@@ -1,0 +1,13 @@
+{
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(bun dev:*)",
+      "Bash(bun run lint:*)",
+      "Bash(bunx tsc --noEmit:*)",
+      "Bash(bun add:*)"
+    ]
+  }
+}

@@ -42,5 +42,9 @@ export async function requireProfile() {
     .single();
 
   if (!profile?.username) redirect("/onboarding");
-  return { supabase, user, profile };
+
+  // ponytail: no generated DB types, so the embed's shape is inferred as an array.
+  const group = [profile.groups].flat()[0] as { name: string; emoji: string } | undefined;
+
+  return { supabase, user, profile, group };
 }
