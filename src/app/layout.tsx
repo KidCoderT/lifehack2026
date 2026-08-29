@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sprout",
+  title: "Garden Quest",
   description: "Sustainability, but actually fun.",
 };
 
@@ -28,7 +28,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="mx-auto flex min-h-full w-full max-w-md flex-col">{children}</body>
+      <body className="mx-auto flex min-h-full w-full max-w-md flex-col">
+        {children}
+      </body>
     </html>
   );
 }
