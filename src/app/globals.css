@@ -1,28 +1,59 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Field Notes sets the whole interface in one monospace face — see DESIGN.md.
+     Both variables resolve to JetBrains Mono on purpose; there is no second face. */
+  --font-sans: var(--font-jetbrains);
+  --font-mono: var(--font-jetbrains);
 
-  /* Sprout design tokens — light theme only, see DESIGN.md */
-  --color-background: #f6faf7;
-  --color-surface: #ffffff;
-  --color-surface-muted: #eef5f0;
-  --color-border: #dbe7de;
+  /* ── Field Notes tokens — light theme only, see DESIGN.md ────────────
+     Flat fills throughout: no gradients, no drop shadows. */
 
-  --color-foreground: #14261c;
-  --color-muted: #5b6f63;
+  /* grounds */
+  --color-background: #edefe6;
+  --color-surface: #f6f8f1;
+  --color-surface-muted: #e4e9dc;
+  --color-border: #dce2d3;
 
-  --color-primary: #16a34a;
-  --color-primary-foreground: #ffffff;
-  --color-accent: #0ea5b0;
-  --color-warn: #d97706;
-  --color-danger: #dc2626;
+  /* text */
+  --color-foreground: #2a3328;
+  --color-muted: #5e6b5c;
+
+  /* action */
+  --color-primary: #2f5a38;
+  --color-primary-foreground: #f6f8f1;
+
+  /* the isometric plot */
+  --color-plot: #cbd9c0;
+  --color-plot-edge: #b2c4a6;
+  --color-plot-hot: #e9a94b;
+
+  /* trees */
+  --color-canopy: #4c7a4e;
+  --color-canopy-deep: #2f5a38;
+  --color-bark: #2a2620;
+
+  /* dark telemetry panel */
+  --color-panel: #2a3328;
+  --color-panel-foreground: #edefe6;
+
+  /* over baseline, N leaking, errors */
+  --color-flag: #b23a2b;
 }
 
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
   overscroll-behavior-y: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evergreen — Royal Field & Botanical Design System</title>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            paper: '#FBF9F4',
+            surface: '#FFFFFF',
+            'surface-warm': '#F5F2EA',
+            border: '#E8E4D9',
+            'border-dark': '#3D3252',
+            foreground: '#19211C',
+            muted: '#637067',
+            forest: {
+              DEFAULT: '#1C4835',
+              dark: '#123325',
+              light: '#286349'
+            },
+            lilac: {
+              DEFAULT: '#A898F3',
+              dark: '#8B78EA',
+              light: '#EDE9FE',
+              subtle: '#F4F0FF'
+            },
+            mint: {
+              DEFAULT: '#C3EBD2',
+              dark: '#2E7D52',
+              light: '#EBF8F0'
+            },
+            plum: {
+              DEFAULT: '#2C223E',
+              dark: '#1E172B',
+              light: '#3E3157'
+            },
+            gold: {
+              DEFAULT: '#F59E0B',
+              light: '#FEF3C7',
+              dark: '#D97706'
+            },
+            danger: {
+              DEFAULT: '#E11D48',
+              light: '#FFE4E6'
+            }
+          },
+          fontFamily: {
+            serif: ['Newsreader', 'Fraunces', 'Merriweather', 'Georgia', 'serif'],
+            sans: ['Inter', 'Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+    
+    body {
+      background-color: #ECE7DD;
+      color: #19211C;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .font-editorial {
+      font-family: 'Fraunces', serif;
+    }
+    
+    .phone-frame {
+      width: 380px;
+      height: 790px;
+      background: #FBF9F4;
+      border-radius: 46px;
+      border: 10px solid #1E172B;
+      box-shadow: 0 30px 70px -15px rgba(30, 23, 43, 0.35), 0 0 0 1px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .phone-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140px;
+      height: 24px;
+      background: #1E172B;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      z-index: 50;
+    }
+
+    .screen-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 74px;
+      scrollbar-width: none;
+    }
+    .screen-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tile-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      transition: all 0.2s ease;
+    }
+
+    /* Pixel art crisp look */
+    .pixel-art {
+      image-rendering: pixelated;
+    }
+  </style>
+</head>
+<body class="p-6 md:p-12">
+
+  <!-- Header & Presentation Bar -->
+  <div class="max-w-7xl mx-auto mb-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[#D8D2C4]">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 bg-lilac-light text-plum-dark font-semibold text-xs rounded-full mb-2 border border-lilac/30">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-lilac-dark"></i>
+          <span>ROYAL FIELD UI • COLLECTIBLE BOTANICAL SYSTEM</span>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-editorial font-bold tracking-tight text-foreground flex items-center gap-3">
+          Evergreen <span class="text-forest text-2xl font-sans font-normal italic">v2.0 Visual System</span>
+        </h1>
+        <p class="text-muted text-sm md:text-base mt-1">
+          Warm paper surfaces, deep forest grounding, royal lilac highlights, and dark plum telemetry cards.
+        </p>
+      </div>
+
+      <!-- Rubric Alignment Badges -->
+      <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-1.5 bg-paper rounded-xl border border-border text-xs font-medium shadow-sm">
+          🎮 <strong>40%</strong> Fun & Delight
+        </span>
+        <span class="px-3 py-1.5 bg-paper rounded-xl border border-border text-xs font-medium shadow-sm">
+          ⚡ <strong>20%</strong> Behavior Shift
+        </span>
+        <span class="px-3 py-1.5 bg-paper rounded-xl border border-border text-xs font-medium shadow-sm">
+          🧲 <strong>20%</strong> Stickiness
+        </span>
+        <span class="px-3 py-1.5 bg-paper rounded-xl border border-border text-xs font-medium shadow-sm">
+          ✨ <strong>20%</strong> Editorial Craft
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 1: UPGRADED DESIGN PALETTE -->
+  <div class="max-w-7xl mx-auto mb-14">
+    <h2 class="text-xl font-editorial font-bold mb-4 flex items-center gap-2 text-foreground">
+      <i data-lucide="palette" class="w-5 h-5 text-forest"></i> 1. Upgraded Core Palette (Paper + Royal Field)
+    </h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+      
+      <!-- Warm Paper -->
+      <div class="bg-paper p-4 rounded-2xl border border-border shadow-sm">
+        <div class="w-full h-12 rounded-xl bg-[#FBF9F4] border border-border mb-3 shadow-inner"></div>
+        <div class="font-bold text-sm text-foreground">Warm Paper</div>
+        <div class="text-xs font-mono text-muted">#FBF9F4</div>
+        <div class="text-[11px] text-muted mt-1">Editorial calm, breathing room</div>
+      </div>
+
+      <!-- Deep Forest -->
+      <div class="bg-paper p-4 rounded-2xl border border-border shadow-sm">
+        <div class="w-full h-12 rounded-xl bg-[#1C4835] mb-3 shadow-inner"></div>
+        <div class="font-bold text-sm text-foreground">Deep Forest</div>
+        <div class="text-xs font-mono text-muted">#1C4835</div>
+        <div class="text-[11px] text-muted mt-1">Primary buttons, eco anchor</div>
+      </div>
+
+      <!-- Royal Lilac -->
+      <div class="bg-paper p-4 rounded-2xl border border-border shadow-sm">
+        <div class="w-full h-12 rounded-xl bg-[#A898F3] mb-3 shadow-inner"></div>
+        <div class="font-bold text-sm text-foreground">Royal Lilac</div>
+        <div class="text-xs font-mono text-muted">#A898F3</div>
+        <div class="text-[11px] text-muted mt-1">Hero headers, game accents</div>
+      </div>
+
+      <!-- Soft Mint -->
+      <div class="bg-paper p-4 rounded-2xl border border-border shadow-sm">
+        <div class="w-full h-12 rounded-xl bg-[#C3EBD2] mb-3 shadow-inner"></div>
+        <div class="font-bold text-sm text-foreground">Fresh Mint</div>
+        <div class="text-xs font-mono text-muted">#C3EBD2</div>
+        <div class="text-[11px] text-muted mt-1">Verified eco status, garden plot</div>
+      </div>
+
+      <!-- Midnight Plum -->
+      <div class="bg-paper p-4 rounded-2xl border border-border shadow-sm">
+        <div class="w-full h-12 rounded-xl bg-[#2C223E] mb-3 shadow-inner"></div>
+        <div class="font-bold text-sm text-foreground">Midnight Plum</div>
+        <div class="text-xs font-mono text-muted">#2C223E</div>
+        <div class="text-[11px] text-muted mt-1">Telemetry cards, group pacts</div>
+      </div>
+
+      <!-- Marigold Gold -->
+      <div class="bg-paper p-4 rounded-2xl border border-border shadow-sm">
+        <div class="w-full h-12 rounded-xl bg-[#F59E0B] mb-3 shadow-inner"></div>
+        <div class="font-bold text-sm text-foreground">Marigold Gold</div>
+        <div class="text-xs font-mono text-muted">#F59E0B</div>
+        <div class="text-[11px] text-muted mt-1">Fertilizer currency & streaks</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION 2: MOBILE APP WIREFRAMES -->
+  <div class="max-w-7xl mx-auto mb-16">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-xl font-editorial font-bold flex items-center gap-2 text-foreground">
+          <i data-lucide="smartphone" class="w-5 h-5 text-forest"></i> 2. Mobile App Wireframes & Interactive Layouts
+        </h2>
+        <p class="text-xs text-muted mt-0.5">Every screen has one clear editorial headline, high-contrast cards, and one strong next action.</p>
+      </div>
+      <span class="text-xs font-medium text-muted bg-paper px-3 py-1 rounded-full border border-border">
+        Interactive scrollable viewports
+      </span>
+    </div>
+
+    <!-- 4 Mobile Mockup Phones -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
+
+      <!-- ================= SCREEN 1: DASHBOARD (Home & Living Tree) ================= -->
+      <div>
+        <div class="text-center mb-2 font-editorial font-semibold text-sm text-foreground">1. Personal Dashboard</div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          
+          <div class="screen-scroll p-4 pt-7">
+            
+            <!-- Hero Lilac Header with Organic Wave -->
+            <div class="bg-lilac rounded-3xl p-4 text-plum-dark relative overflow-hidden mb-3.5 shadow-sm">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-plum/80">NUS Eusoff • Block B</span>
+                <span class="px-2 py-0.5 bg-paper/90 rounded-full text-[10px] font-bold font-mono text-plum flex items-center gap-1 shadow-sm">
+                  <i data-lucide="flame" class="w-3 h-3 text-gold-dark fill-gold"></i> 5d Streak
+                </span>
+              </div>
+              <h3 class="text-lg font-editorial font-bold leading-tight text-plum-dark">
+                Your sanctuary is in bloom.
+              </h3>
+              <p class="text-[11px] text-plum/80 mt-1">Solar Squad • Level 4 Canopy</p>
+            </div>
+
+            <!-- Fertilizer Points Currency Bar -->
+            <div class="bg-surface rounded-2xl border border-border p-3 mb-3.5 flex items-center justify-between shadow-xs">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-gold-light text-gold-dark flex items-center justify-center font-bold text-sm border border-gold/30">
+                  🌾
+                </div>
+                <div>
+                  <div class="text-[10px] text-muted font-medium uppercase tracking-wider">Fertilizer Stash</div>
+                  <div class="text-xs font-extrabold font-mono text-foreground">340 Points</div>
+                </div>
+              </div>
+              <button class="px-3 py-1.5 bg-forest text-white text-xs font-bold rounded-full shadow-sm active:scale-95 transition-transform flex items-center gap-1.5">
+                <span>Feed Tree</span>
+                <i data-lucide="sparkles" class="w-3 h-3"></i>
+              </button>
+            </div>
+
+            <!-- Living Tree Companion Stage -->
+            <div class="bg-surface rounded-3xl border border-border p-4 mb-3.5 text-center relative overflow-hidden shadow-xs">
+              
+              <!-- Badge -->
+              <div class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-mint-light text-mint-dark rounded-full text-[10px] font-bold uppercase tracking-wider mb-1 border border-mint/40">
+                <span>🌸 Blooming Canopy</span>
+              </div>
+
+              <!-- Animated Tree / Sprite View -->
+              <div class="w-32 h-32 mx-auto my-2 flex items-center justify-center">
+                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                  <!-- Trunk -->
+                  <path d="M46 94 L54 94 L53 58 L47 58 Z" fill="#6B4F3B" />
+                  <!-- Foliage Layers with Botanical Shades -->
+                  <circle cx="50" cy="50" r="25" fill="#1C4835" />
+                  <circle cx="35" cy="42" r="17" fill="#286349" />
+                  <circle cx="65" cy="42" r="17" fill="#286349" />
+                  <circle cx="50" cy="30" r="19" fill="#A898F3" />
+                  <!-- Blossoms -->
+                  <circle cx="42" cy="32" r="3" fill="#FFFFFF" />
+                  <circle cx="58" cy="36" r="3.5" fill="#FFFFFF" />
+                  <circle cx="48" cy="48" r="3" fill="#FFE4E6" />
+                  <circle cx="34" cy="48" r="2.5" fill="#FFE4E6" />
+                </svg>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="w-full bg-surface-warm rounded-full h-2 mb-1 overflow-hidden border border-border">
+                <div class="bg-forest h-full rounded-full" style="width: 78%;"></div>
+              </div>
+              <div class="flex justify-between text-[10px] text-muted font-medium">
+                <span class="font-mono">780 / 1,000 pts</span>
+                <span class="text-forest font-bold">220 pts to Ancient Oak</span>
+              </div>
+            </div>
+
+            <!-- Midnight Plum High-Contrast Metric Card -->
+            <div class="bg-plum rounded-3xl p-4 text-white mb-3.5 shadow-sm">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-mono text-lilac uppercase tracking-wider flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-mint"></span>
+                  WEEKLY IMPACT DELTA
+                </span>
+                <span class="text-[10px] text-mint font-bold px-2 py-0.5 bg-plum-light rounded-full">
+                  -14.2% kWh
+                </span>
+              </div>
+              <div class="text-2xl font-editorial font-bold">11.8 kWh <span class="text-xs font-sans text-white/60 font-normal">avg/day</span></div>
+              
+              <!-- Subtle Wave SVG Replay Line -->
+              <div class="w-full h-8 mt-2 flex items-end">
+                <svg viewBox="0 0 100 24" class="w-full h-full stroke-lilac fill-none" stroke-width="2.5" stroke-linecap="round">
+                  <path d="M 0 18 Q 20 4, 40 16 T 80 8 T 100 12" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Waste Alert Callout -->
+            <div class="bg-surface-warm border border-gold/40 p-3 rounded-2xl flex items-start gap-2.5">
+              <div class="w-6 h-6 rounded-lg bg-gold-light text-gold-dark flex items-center justify-center shrink-0 mt-0.5">
+                <i data-lucide="bell" class="w-3.5 h-3.5"></i>
+              </div>
+              <div class="text-[11px] text-foreground flex-1">
+                <span class="font-bold">Hall Lounge Waste Alert:</span> Unoccupied AC on.
+                <div class="mt-1 flex gap-2">
+                  <button class="text-[10px] font-bold text-forest bg-mint-light px-2 py-0.5 rounded-md border border-mint/50">
+                    I Fixed It (+25 pts)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Nav (Shared Component) -->
+          <div class="absolute bottom-0 left-0 right-0 h-16 bg-paper/95 backdrop-blur-md border-t border-border flex items-center justify-around px-2 z-40">
+            <button class="flex flex-col items-center gap-0.5 text-forest font-bold">
+              <i data-lucide="home" class="w-5 h-5"></i>
+              <span class="text-[9px]">Home</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="grid" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">Garden</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="zap" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">EcoVolt</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="gift" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">Rewards</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="user" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">Me</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ================= SCREEN 2: 5x5 COMMUNITY GARDEN ================= -->
+      <div>
+        <div class="text-center mb-2 font-editorial font-semibold text-sm text-foreground">2. 5x5 Community Garden</div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          
+          <div class="screen-scroll p-4 pt-7">
+            
+            <!-- Editorial Header -->
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <span class="text-[10px] text-muted uppercase font-bold tracking-wider">Collective Grounds</span>
+                <h3 class="text-base font-editorial font-bold text-foreground">
+                  Solar Squad Garden ☀️
+                </h3>
+              </div>
+              <span class="text-[10px] font-mono px-2 py-0.5 bg-mint-light text-forest border border-mint rounded-full font-bold">
+                24 Stewards
+              </span>
+            </div>
+
+            <!-- Midnight Plum Group Quest Pact Card -->
+            <div class="bg-plum rounded-3xl p-4 text-white mb-3.5 shadow-sm relative overflow-hidden">
+              <div class="flex justify-between items-center text-xs mb-1">
+                <span class="text-lilac font-mono text-[10px] uppercase tracking-wider">Active Group Pact</span>
+                <span class="font-mono text-mint text-xs font-bold">3,850 / 5,000 pts</span>
+              </div>
+              <div class="text-sm font-editorial font-bold mb-2">
+                🎢 Universal Studios 30% Pass
+              </div>
+              <div class="w-full bg-plum-light rounded-full h-2.5 overflow-hidden border border-border-dark">
+                <div class="bg-lilac h-full rounded-full" style="width: 77%;"></div>
+              </div>
+              <div class="text-[10px] text-white/70 mt-2 flex justify-between">
+                <span>Unlock threshold: 50 pts/member</span>
+                <span class="font-bold text-mint font-mono">77% Ready</span>
+              </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="relative mb-3">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-muted absolute left-3 top-3"></i>
+              <input type="text" placeholder="Find member username..." class="w-full pl-8 pr-3 py-2 bg-surface text-xs rounded-xl border border-border focus:outline-none focus:ring-1 focus:ring-forest" value="weiling_nus" />
+            </div>
+
+            <!-- 5x5 Warm Paper Matrix Grid -->
+            <div class="bg-surface-warm p-2.5 rounded-3xl border border-border mb-3 shadow-inner">
+              <div class="grid grid-cols-5 gap-1.5 text-center">
+                
+                <!-- 25 Cells with Botanical Sprites -->
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌱</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌿</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌳</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌲</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌸</div>
+
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌿</div>
+                <!-- Highlighted Selected User -->
+                <div class="h-10 rounded-xl bg-lilac-subtle border-2 border-lilac-dark flex items-center justify-center text-base shadow-sm ring-2 ring-lilac/40">🌸</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌳</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌱</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌿</div>
+
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌳</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌲</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌸</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌿</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌱</div>
+
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌿</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌳</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌱</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌲</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌸</div>
+
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌱</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌿</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌳</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🌲</div>
+                <div class="h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-sm tile-hover cursor-pointer">🪹</div>
+              </div>
+            </div>
+
+            <!-- Inspect Card (Drawer Style) -->
+            <div class="bg-surface rounded-2xl border border-border p-3.5 shadow-sm">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-full bg-lilac text-plum-dark flex items-center justify-center font-bold text-xs">
+                    WL
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold text-foreground">@weiling_nus</div>
+                    <div class="text-[10px] text-muted">Bloomed Cherry • Level 5</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs font-extrabold font-mono text-forest">420 pts</div>
+                  <div class="text-[9px] text-muted">Contributed</div>
+                </div>
+              </div>
+
+              <!-- Peer Actions -->
+              <div class="flex gap-2 mt-2 pt-2 border-t border-border">
+                <button class="flex-1 py-1.5 bg-surface-warm text-foreground text-[11px] font-semibold rounded-xl border border-border flex items-center justify-center gap-1 hover:bg-border">
+                  <i data-lucide="bell" class="w-3 h-3 text-gold-dark"></i>
+                  <span>Nudge to Save</span>
+                </button>
+                <button class="flex-1 py-1.5 bg-forest text-white text-[11px] font-bold rounded-xl flex items-center justify-center gap-1">
+                  <span>Send Cheers 👏</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Nav -->
+          <div class="absolute bottom-0 left-0 right-0 h-16 bg-paper/95 backdrop-blur-md border-t border-border flex items-center justify-around px-2 z-40">
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="home" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">Home</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-forest font-bold">
+              <i data-lucide="grid" class="w-5 h-5"></i>
+              <span class="text-[9px]">Garden</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="zap" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">EcoVolt</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="gift" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">Rewards</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="user" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">Me</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ================= SCREEN 3: ECOVOLT TELEMETRY ================= -->
+      <div>
+        <div class="text-center mb-2 font-editorial font-semibold text-sm text-foreground">3. EcoVolt Telemetry</div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          
+          <div class="screen-scroll p-4 pt-7">
+            
+            <!-- Telemetry Header -->
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <span class="text-[10px] text-forest uppercase font-bold tracking-wider flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-forest animate-ping"></span>
+                  HARDWARE ONLINE
+                </span>
+                <h3 class="text-sm font-editorial font-bold text-foreground">
+                  EcoVolt Node #EV-402
+                </h3>
+              </div>
+              <div class="px-2 py-0.5 bg-mint text-forest rounded-full text-[10px] font-mono font-bold">
+                Live Feed
+              </div>
+            </div>
+
+            <!-- Dark Plum Device Draw Live Replay Card -->
+            <div class="bg-plum rounded-3xl p-4 text-white mb-3.5 shadow-sm">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <span class="text-[10px] text-lilac font-mono uppercase tracking-wider">Device Draw • Live Replay</span>
+                  <div class="text-2xl font-editorial font-bold mt-0.5">1.8 kWh</div>
+                </div>
+                <span class="px-2 py-1 bg-plum-light text-mint text-[10px] font-mono font-bold rounded-lg">
+                  -18.0% vs Base
+                </span>
+              </div>
+
+              <!-- Replay Chart with Multi-Wave Lines -->
+              <div class="w-full h-16 my-2 relative">
+                <svg viewBox="0 0 100 40" class="w-full h-full fill-none" stroke-width="2">
+                  <!-- Baseline dashed -->
+                  <line x1="0" y1="12" x2="100" y2="12" stroke="#637067" stroke-dasharray="3 3" />
+                  <!-- Actual curve -->
+                  <path d="M 0 30 Q 25 15, 50 28 T 100 18" stroke="#A898F3" stroke-width="2.5" />
+                </svg>
+              </div>
+
+              <div class="flex justify-between text-[10px] text-white/60 font-mono">
+                <span>00:00 (Night base)</span>
+                <span class="text-mint font-bold">+180 Pts Earned</span>
+                <span>Current</span>
+              </div>
+            </div>
+
+            <!-- Conversion Rule Banner -->
+            <div class="bg-surface rounded-2xl border border-border p-3 mb-3 text-center">
+              <span class="text-[10px] text-muted uppercase font-bold tracking-wider">Formula Protocol</span>
+              <div class="text-xs font-bold text-forest font-mono mt-0.5">
+                ⚡ 1% Reduction = 10 Fertilizer Points
+              </div>
+            </div>
+
+            <!-- Breakdown Rows -->
+            <div class="space-y-2 mb-4">
+              <div class="bg-surface p-3 rounded-2xl border border-border flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-7 h-7 rounded-lg bg-surface-warm flex items-center justify-center text-xs">⚡</div>
+                  <div>
+                    <div class="text-xs font-bold text-foreground">Room Aircon & Plugs</div>
+                    <div class="text-[10px] text-muted">Baseline: 14.5 kWh • Actual: 11.8 kWh</div>
+                  </div>
+                </div>
+                <span class="text-xs font-mono font-bold text-forest">-18.6%</span>
+              </div>
+
+              <div class="bg-surface p-3 rounded-2xl border border-border flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-7 h-7 rounded-lg bg-surface-warm flex items-center justify-center text-xs">💧</div>
+                  <div>
+                    <div class="text-xs font-bold text-foreground">Shower & Basin Flow</div>
+                    <div class="text-[10px] text-muted">Baseline: 45 L • Actual: 41 L</div>
+                  </div>
+                </div>
+                <span class="text-xs font-mono font-bold text-forest">-8.8%</span>
+              </div>
+            </div>
+
+            <!-- Strong Next Action Button -->
+            <button class="w-full py-3 bg-forest text-white rounded-2xl text-xs font-bold shadow-sm flex items-center justify-center gap-2 active:scale-98">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Sync EcoVolt Telemetry Meter</span>
+            </button>
+
+          </div>
+
+          <!-- Bottom Nav -->
+          <div class="absolute bottom-0 left-0 right-0 h-16 bg-paper/95 backdrop-blur-md border-t border-border flex items-center justify-around px-2 z-40">
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="home" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">Home</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="grid" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">Garden</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-forest font-bold">
+              <i data-lucide="zap" class="w-5 h-5"></i>
+              <span class="text-[9px]">EcoVolt</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="gift" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">Rewards</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="user" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">Me</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ================= SCREEN 4: REWARDS & VOUCHER VAULT ================= -->
+      <div>
+        <div class="text-center mb-2 font-editorial font-semibold text-sm text-foreground">4. Rewards & Voucher Vault</div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          
+          <div class="screen-scroll p-4 pt-7">
+            
+            <!-- Vault Header with Point Stash -->
+            <div class="bg-forest rounded-3xl p-4 text-white mb-3.5 shadow-sm">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[10px] font-mono text-mint uppercase tracking-wider">Redeemable Balance</span>
+                <span class="text-[10px] text-white/70">Season One</span>
+              </div>
+              <div class="text-2xl font-editorial font-bold flex items-center gap-2">
+                🌾 340 <span class="text-sm font-sans text-mint font-normal">Fertilizer Points</span>
+              </div>
+            </div>
+
+            <!-- Group Milestone Perks -->
+            <div class="mb-4">
+              <div class="text-xs font-editorial font-bold text-foreground mb-2 flex items-center gap-1.5">
+                <i data-lucide="users" class="w-3.5 h-3.5 text-forest"></i>
+                <span>Collective Milestone Unlocks</span>
+              </div>
+
+              <!-- Unlocked Group Card -->
+              <div class="bg-surface rounded-2xl border border-forest/30 p-3 mb-2 shadow-xs relative overflow-hidden">
+                <div class="absolute right-0 top-0 bg-mint text-forest text-[9px] font-extrabold px-2 py-0.5 rounded-bl-lg">
+                  UNLOCKED
+                </div>
+                <div class="flex items-start gap-2.5">
+                  <div class="w-10 h-10 rounded-xl bg-lilac-light text-plum flex items-center justify-center text-lg shadow-xs">
+                    🎢
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold text-foreground">Universal Studios 30% Pass</div>
+                    <div class="text-[10px] text-muted">Solar Squad Group Milestone</div>
+                    <button class="mt-2 px-3 py-1 bg-forest text-white text-[10px] font-bold rounded-lg active:scale-95 shadow-xs">
+                      Claim Group Voucher
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Locked Group Card -->
+              <div class="bg-surface rounded-2xl border border-border p-3 opacity-70">
+                <div class="flex items-start gap-2.5">
+                  <div class="w-10 h-10 rounded-xl bg-surface-warm flex items-center justify-center text-lg grayscale">
+                    🔐
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex justify-between items-center">
+                      <div class="text-xs font-bold text-foreground">Escape Room Night Out</div>
+                      <span class="text-[9px] text-gold-dark font-bold font-mono">82%</span>
+                    </div>
+                    <div class="text-[10px] text-muted">Unlocks at 5,000 group points</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Personal Voucher Catalog -->
+            <div>
+              <div class="text-xs font-editorial font-bold text-foreground mb-2 flex items-center gap-1.5">
+                <i data-lucide="ticket" class="w-3.5 h-3.5 text-lilac-dark"></i>
+                <span>Personal Point Rewards</span>
+              </div>
+
+              <div class="space-y-2">
+                <div class="bg-surface p-3 rounded-2xl border border-border flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-surface-warm flex items-center justify-center text-sm">🧋</div>
+                    <div>
+                      <div class="text-xs font-bold text-foreground">Free LiHO Bubble Tea</div>
+                      <div class="text-[10px] text-muted">Any regular drink</div>
+                    </div>
+                  </div>
+                  <button class="px-3 py-1 bg-surface-warm border border-border text-foreground text-[10px] font-bold rounded-xl font-mono hover:bg-forest hover:text-white transition-colors">
+                    200 pts
+                  </button>
+                </div>
+
+                <div class="bg-surface p-3 rounded-2xl border border-border flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-surface-warm flex items-center justify-center text-sm">🍜</div>
+                    <div>
+                      <div class="text-xs font-bold text-foreground">$5 GrabFood Voucher</div>
+                      <div class="text-[10px] text-muted">Orders above $15</div>
+                    </div>
+                  </div>
+                  <button class="px-3 py-1 bg-surface-warm border border-border text-foreground text-[10px] font-bold rounded-xl font-mono hover:bg-forest hover:text-white transition-colors">
+                    300 pts
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Nav -->
+          <div class="absolute bottom-0 left-0 right-0 h-16 bg-paper/95 backdrop-blur-md border-t border-border flex items-center justify-around px-2 z-40">
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="home" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">Home</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="grid" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">Garden</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="zap" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">EcoVolt</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-forest font-bold">
+              <i data-lucide="gift" class="w-5 h-5"></i>
+              <span class="text-[9px]">Rewards</span>
+            </button>
+            <button class="flex flex-col items-center gap-0.5 text-muted hover:text-foreground">
+              <i data-lucide="user" class="w-5 h-5"></i>
+              <span class="text-[9px] font-medium">Me</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION 3: DESIGN SPEC & PRODUCTION TOKENS -->
+  <div class="max-w-7xl mx-auto bg-surface rounded-3xl border border-border p-6 md:p-8 shadow-sm">
+    <h2 class="text-xl font-editorial font-bold mb-4 flex items-center gap-2 text-foreground">
+      <i data-lucide="file-check" class="w-5 h-5 text-forest"></i> 3. Visual Grammar & Production Rules
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <div class="p-4 rounded-2xl bg-surface-warm border border-border">
+        <div class="text-forest font-editorial font-bold text-sm mb-1">01 • Editorial Calm</div>
+        <p class="text-xs text-muted leading-relaxed">
+          The warm paper ground (<code class="text-[11px] text-forest font-mono">#FBF9F4</code>) gives the game room to breathe. No stark white hospital vibes.
+        </p>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-surface-warm border border-border">
+        <div class="text-plum font-editorial font-bold text-sm mb-1">02 • Reward & Status Clarity</div>
+        <p class="text-xs text-muted leading-relaxed">
+          <strong>Deep Forest</strong> means verified eco action. <strong>Royal Lilac</strong> marks game milestones. <strong>Gold</strong> is currency & streaks.
+        </p>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-surface-warm border border-border">
+        <div class="text-forest-dark font-editorial font-bold text-sm mb-1">03 • One Strong Action</div>
+        <p class="text-xs text-muted leading-relaxed">
+          Every viewport delivers one unambiguous CTA: <em>"Feed Tree"</em>, <em>"Nudge to Save"</em>, <em>"Sync EcoVolt Meter"</em>, or <em>"Claim Group Voucher"</em>.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

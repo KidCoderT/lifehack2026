@@ -8,47 +8,36 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# Sprout project conventions
+# Evergreen project conventions
 
-## Frontend
+## Commands
 
-- Light theme only — no dark mode variant anywhere. Colors live as CSS
-  custom properties in `src/app/globals.css`'s `@theme` block; use the
-  token utilities (`bg-background`, `text-primary`, `text-muted`, etc.),
-  don't hardcode hex or `zinc-*`/`lime-*` Tailwind defaults in new code.
-  See `DESIGN.md` for the full token/component spec.
-- Shared UI lives in `src/components/ui/` (`Card`, `Button`, `StatCard`)
-  and `src/components/nav/` (`BottomNav`). Check there before inlining a
-  new card/button style a third time.
-- Animation: use the `motion` package (`motion/react`), not raw CSS
-  transitions, for tap feedback, progress fills, and count-ups. Pages
-  under `src/app/**/page.tsx` are `async` server components — keep them
-  that way. Anything using `motion` (`whileTap`, animated values) belongs
-  in a small `"use client"` leaf component the server page renders with
-  plain props; don't convert a whole page to a client component just to
-  animate one part of it.
-- Icons: `lucide-react` for all UI iconography (nav, buttons, stat rows).
-  Emoji stays only where it's actual data from the database (e.g. a
-  group's `emoji` column) — never as a stand-in for a UI icon.
-- Mobile-first: the app is a single `max-w-md` column
-  (`src/app/layout.tsx`). Don't design for wide viewports; this isn't a
-  responsive multi-column app.
+- Dev server: `bun run dev`
+- Seed database: `bun run seed`
+- Typecheck/Lint: `bun run lint`
+- Production build: `bun run build`
 
-## Backend / Supabase
+## Frontend & Styling
 
-- `requireProfile()` in `src/lib/supabase/server.ts` is the auth +
-  onboarding gate. Call it at the top of any authed page; it redirects to
-  `/login` or `/onboarding` as needed and returns
-  `{ supabase, user, profile, group }`. Don't re-implement the gate —
-  reuse it.
-- Schema changes go in `supabase/schema.sql` only, kept idempotent
-  (`create table if not exists`, `drop policy if exists` + recreate).
-  Never hand-edit via the dashboard without also updating this file.
-- No generated DB types exist yet — untyped embeds from `.select()` need a
-  manual cast; keep those casts contained to `requireProfile()` rather than
-  repeating them per-page. Once a third untyped embed shows up, run
-  `bunx supabase gen types typescript --linked` instead.
-- RLS is on for every table — a new table needs
-  `enable row level security` plus explicit `select`/`update`/etc.
-  policies in the same schema.sql change, or authenticated reads/writes
-  will silently return nothing.
+- **Light theme only** — no dark mode variant anywhere. Colors live as CSS custom properties in `src/app/globals.css` `@theme` block; use the token utilities (`bg-background`, `bg-surface`, `bg-surface-muted`, `border-border`, `text-primary`, `text-muted`, `text-flag`, `bg-plot`, `bg-plot-hot`, `fill-canopy`, `fill-canopy-deep`, `stroke-bark`, `bg-panel`). There is no `accent`, `warn`, or `danger` token — amber is `plot-hot`, red is `flag`. Never hardcode hex colors or default Tailwind `zinc-*`/`lime-*` classes. See `DESIGN.md` for the full table.
+- **Field Notes visual system** — the whole interface is set in one monospace face (JetBrains Mono, loaded once in `src/app/layout.tsx`; `font-sans` and `font-mono` resolve to the same family on purpose). Flat fills only: **no gradients and no shadows anywhere**, and no opacity ramps in artwork — a lighter green is `canopy`, a darker one is `canopy-deep`. Card radius tops out at `rounded-2xl`.
+- **Mobile-first**: The app is rendered in a single `max-w-md` container (`src/app/layout.tsx`). Design strictly for mobile viewports.
+- **Shared UI**: Use `src/components/ui/` (`Card`, `Button`, `StatCard`, `ProgressBar`, `Avatar`) and `src/components/nav/` (`BottomNav`).
+- **Animation**: Use `motion` (`motion/react`), not raw CSS transitions, for tap feedback (`whileTap`), progress fills, and count-ups.
+- **Server Components vs Client Leaves**: Pages under `src/app/**/page.tsx` are `async` server components — keep them that way. Components utilizing `motion`, event handlers, or React hooks must be small `"use client"` leaf components rendered by the server page.
+- **Icons**: `lucide-react` for all UI iconography (nav, buttons, stats). Emoji is strictly reserved for database data values (e.g. group `emoji`, voucher `emoji`).
+
+## Backend & Supabase
+
+- `requireProfile()` in `src/lib/supabase/server.ts` is the auth + onboarding gate. Call it at the top of any authed page; it redirects to `/login` or `/onboarding` as needed and returns `{ supabase, user, profile, groups }`.
+- **Database Schema**: All changes go into `supabase/schema.sql`, kept idempotent (`create table if not exists`, `drop policy if exists` + recreate).
+- **Row Level Security (RLS)**: Enabled on all tables. Any table query or mutation must satisfy RLS policies.
+- **Immutable Ledger**: User points are never mutated directly on profile rows. Points are derived from the `ledger` table (`kind: 'earn' | 'contribute' | 'redeem'`).
+  - Wallet balance = $\sum \text{earn} - \sum \text{contribute} - \sum \text{redeem}$.
+  - Tree growth per group = $\sum \text{contribute}$ for that `group_id`.
+  - Global leaderboard = $\sum \text{earn}$.
+
+## Math & Points Mechanics (`src/lib/points.ts`)
+
+- **Energy-to-Points**: $1\%$ reduction below baseline $= 10\text{ points/day}$ (floored at 0 via `earnFor(baseline, actual)`).
+- **Tree Stages**: 6 stages ($0 - 5$) evaluated via `treeStage(contributed)`: Seed (0), Sprout (50), Sapling (150), Young Tree (400), Mature Tree (800), Blossoming (1500).

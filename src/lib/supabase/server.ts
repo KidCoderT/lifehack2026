@@ -27,7 +27,15 @@ export async function createClient() {
   );
 }
 
-/** Logged-in user + their profile. Sends first-time users to pick a username. */
+export type Group = {
+  id: number;
+  name: string;
+  emoji: string;
+  goal_title: string;
+  goal_points: number;
+};
+
+/** Logged-in user + profile + communities. Sends first-time users to pick a username. */
 export async function requireProfile() {
   const supabase = await createClient();
   const {
@@ -37,14 +45,20 @@ export async function requireProfile() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, avatar_url, groups(name, emoji)")
+    .select("username, avatar_url")
     .eq("id", user.id)
     .single();
 
   if (!profile?.username) redirect("/onboarding");
 
-  // ponytail: no generated DB types, so the embed's shape is inferred as an array.
-  const group = [profile.groups].flat()[0] as { name: string; emoji: string } | undefined;
+  const { data: memberships, error } = await supabase
+    .from("group_memberships")
+    .select("groups(id, name, emoji, goal_title, goal_points)")
+    .eq("user_id", user.id);
+  if (error) console.error("memberships query:", error);
 
-  return { supabase, user, profile, group };
+  // ponytail: no generated DB types — the only FK embed in the app, cast contained here.
+  const groups = (memberships ?? []).flatMap((m) => [m.groups].flat()) as Group[];
+
+  return { supabase, user, profile, groups };
 }

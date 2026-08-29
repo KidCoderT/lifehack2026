@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evergreen — three directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Outfit:wght@400;500;600&family=Space+Grotesk:wght@500;700&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+/* ───────────────────────────────────────────────────────────
+   SHARED SKELETON
+   Every component below is written once against CSS custom
+   properties. Each direction re-tints them via .dir-a/.dir-b/.dir-c.
+   The winning block lifts straight into globals.css @theme.
+   ─────────────────────────────────────────────────────────── */
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:#E6E4DD;color:#23261F;
+  font:400 15px/1.55 "Hanken Grotesk",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+.wrap{max-width:1580px;margin:0 auto;padding:0 28px}
+
+/* page chrome */
+.topbar{
+  position:sticky;top:0;z-index:60;background:#E6E4DDF2;
+  backdrop-filter:blur(10px);border-bottom:1px solid #CFCCC2;
+}
+.topbar .wrap{display:flex;align-items:center;gap:18px;height:56px;flex-wrap:wrap}
+.topbar b{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.topbar nav{display:flex;gap:6px;margin-left:auto}
+.topbar nav a{
+  font:500 12px/1 "JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase;
+  padding:8px 12px;border-radius:999px;text-decoration:none;color:#5C6155;
+  border:1px solid transparent;
+}
+.topbar nav a:hover,.topbar nav a:focus-visible{background:#fff;border-color:#CFCCC2;color:#23261F}
+
+.masthead{padding:52px 0 8px}
+.masthead h1{margin:0 0 10px;font-size:clamp(30px,4vw,46px);font-weight:700;letter-spacing:-.025em;line-height:1.05}
+.masthead p{margin:0;max-width:62ch;color:#5C6155;font-size:16px}
+
+.verdict{
+  margin:0 0 18px;padding:12px 16px;border-radius:10px;max-width:74ch;
+  background:#2F5A38;color:#F6F8F1;font:400 13.5px/1.5 "JetBrains Mono",monospace;
+}
+.verdict b{font-weight:700}
+.verdict code{background:#ffffff22;padding:1px 5px;border-radius:4px}
+.fixes{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 8px}
+.fixes span{
+  font:500 12px/1 "JetBrains Mono",monospace;background:#fff;border:1px solid #CFCCC2;
+  padding:8px 12px;border-radius:8px;color:#3C4038;
+}
+
+hr.rule{border:0;border-top:1px solid #CFCCC2;margin:44px 0 0}
+
+/* direction section */
+.dir{padding:52px 0 68px}
+.dir-head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:24px;margin-bottom:26px}
+.dir-head h2{margin:0;font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.dir-head .key{
+  font:500 12px/1 "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;
+  color:#6B7064;margin-bottom:10px;display:block;
+}
+.dir-head .sig{max-width:52ch;margin:0;color:#4A4E45;font-size:15px}
+.dir-head .sig b{font-weight:700;color:#23261F}
+.risk{
+  margin:10px 0 0;font-size:13.5px;color:#6B7064;max-width:52ch;
+  border-left:2px solid #C4402F;padding-left:12px;
+}
+
+/* token strip */
+.tokens{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 30px}
+.tok{background:#fff;border:1px solid #CFCCC2;border-radius:12px;padding:10px;width:150px}
+.tok i{display:block;height:38px;border-radius:7px;margin-bottom:8px;border:1px solid #00000012}
+.tok b{display:block;font-size:12.5px;font-weight:600}
+.tok code{display:block;font:400 11.5px/1.5 "JetBrains Mono",monospace;color:#7A7F73}
+.tok small{display:block;font-size:11.5px;color:#7A7F73;margin-top:2px;line-height:1.35}
+
+/* phone rack */
+.rack{display:flex;gap:22px;overflow-x:auto;padding:6px 0 22px;scrollbar-width:thin}
+.slot{flex:0 0 auto}
+.slot>h3{
+  margin:0 0 10px;font:500 12px/1 "JetBrains Mono",monospace;
+  letter-spacing:.09em;text-transform:uppercase;color:#6B7064;
+}
+.phone{
+  width:356px;height:780px;border-radius:44px;border:9px solid #23261F;
+  background:var(--ground);position:relative;overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 22px 44px -18px #23261F4D;
+}
+.phone::before{
+  content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:118px;height:22px;background:#23261F;border-radius:0 0 12px 12px;z-index:9;
+}
+.screen{flex:1;overflow-y:auto;padding:36px 18px 84px;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+
+/* ── components, all var-driven ────────────────────────── */
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px;box-shadow:var(--card-shadow);
+}
+.screen>*+*{margin-top:12px}
+
+.label{
+  font:500 11.5px/1 var(--font-mono);letter-spacing:.11em;text-transform:uppercase;color:var(--muted);
+}
+.num{font:500 1em/1 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--ink)}
+.big{font:var(--big-weight) 46px/1 var(--font-display);letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}
+.mid{font:var(--big-weight) 26px/1.05 var(--font-display);letter-spacing:-.02em;color:var(--ink)}
+.body{font:400 13.5px/1.5 var(--font-body);color:var(--ink);margin:0}
+.dim{color:var(--muted)}
+.hot{color:var(--flag)}
+.good{color:var(--primary)}
+
+.btn{
+  appearance:none;border:0;cursor:pointer;width:100%;
+  font:600 15px/1 var(--font-body);padding:15px 18px;border-radius:var(--btn-radius);
+  background:var(--card-2);color:var(--ink);
+}
+.btn-primary{background:var(--primary);color:var(--primary-ink);box-shadow:var(--btn-shadow)}
+.btn-primary:active{transform:translateY(var(--btn-press));box-shadow:var(--btn-shadow-press)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.btn-sm{width:auto;font-size:13px;padding:10px 14px}
+
+.bar{height:8px;border-radius:999px;background:var(--card-2);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:999px;background:var(--primary)}
+.bar.hotbar>i{background:var(--plot-hot)}
+
+.split{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pill{
+  display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 10px;
+  font:500 11.5px/1 var(--font-mono);letter-spacing:.05em;background:var(--card-2);color:var(--ink);
+}
+.pill.flagged{background:var(--flag);color:#fff}
+.pill svg{width:13px;height:13px;flex:0 0 auto}
+.row{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--border)}
+.row:first-child{border-top:0}
+.row .ico{
+  width:32px;height:32px;flex:0 0 auto;border-radius:9px;background:var(--card-2);
+  display:grid;place-items:center;color:var(--primary);
+}
+.row .ico svg{width:16px;height:16px}
+.row b{display:block;font:600 13.5px/1.3 var(--font-body);color:var(--ink)}
+.row small{display:block;font:400 12px/1.4 var(--font-body);color:var(--muted)}
+.row .end{margin-left:auto;text-align:right}
+
+.hero{
+  border-radius:var(--radius);padding:14px 14px 16px;position:relative;overflow:hidden;
+  background:var(--card);border:1px solid var(--border);
+}
+.hero .tree-stage{display:grid;place-items:end center;height:210px}
+.hero .tree-stage svg{height:200px;width:auto}
+
+.panel{background:var(--panel);color:var(--panel-ink);border-radius:var(--radius);padding:16px;border:0}
+.panel .label{color:var(--panel-ink);opacity:.72}
+.panel .big,.panel .num,.panel .mid{color:var(--panel-ink)}
+
+.plotwrap{padding:8px 4px 4px}
+.plotwrap svg{width:100%;height:auto;display:block}
+.tap{
+  display:block;text-align:center;margin:6px 0 0;
+  font:400 12.5px/1 var(--font-mono);color:var(--muted);
+  text-decoration:underline;text-underline-offset:4px;text-decoration-style:dotted;
+}
+
+/* bottom nav */
+.tabs{
+  position:absolute;left:0;right:0;bottom:0;height:66px;z-index:8;
+  background:var(--card);border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-around;padding-bottom:4px;
+}
+.tabs a{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--muted)}
+.tabs a svg{width:21px;height:21px}
+.tabs a span{font:500 11px/1 var(--font-body)}
+.tabs a.on{color:var(--primary)}
+.tabs a.on span{font-weight:700}
+
+/* signature demo strip */
+.demo{
+  margin-top:8px;background:#fff;border:1px solid #CFCCC2;border-radius:18px;padding:20px 22px;
+}
+.demo h4{margin:0 0 4px;font-size:15px;font-weight:700}
+.demo p{margin:0 0 16px;font-size:13.5px;color:#5C6155;max-width:70ch}
+.demo-row{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+.demo-cell{width:250px}
+.demo-cell>span{
+  display:block;margin-bottom:7px;
+  font:500 11.5px/1 "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:#6B7064;
+}
+.demo-cell .frame{border-radius:16px;padding:12px;overflow:hidden}
+
+/* ───────────────────────────────────────────────────────────
+   DIRECTION A — FIELD NOTES
+   Flat vector, restrained sage, monospace everywhere.
+   ─────────────────────────────────────────────────────────── */
+.dir-a{
+  --ground:#EDEFE6; --card:#F6F8F1; --card-2:#E4E9DC; --border:#DCE2D3;
+  --plot:#CBD9C0; --plot-edge:#B2C4A6; --plot-hot:#E9A94B;
+  --canopy:#4C7A4E; --canopy-2:#2F5A38; --bark:#2A2620;
+  --ink:#2A3328; --muted:#5E6B5C; --primary:#2F5A38; --primary-ink:#F6F8F1;
+  --flag:#B23A2B; --panel:#2A3328; --panel-ink:#EDEFE6;
+  --radius:16px; --btn-radius:12px; --card-shadow:none;
+  --btn-shadow:none; --btn-shadow-press:none; --btn-press:1px;
+  --font-display:"JetBrains Mono",monospace;
+  --font-body:"JetBrains Mono",monospace;
+  --font-mono:"JetBrains Mono",monospace;
+  --big-weight:700;
+}
+.dir-a .big{letter-spacing:-.02em;font-size:42px}
+.dir-a .btn{font-weight:700;letter-spacing:.02em}
+.dir-a .body{font-size:13px;line-height:1.6}
+
+/* ───────────────────────────────────────────────────────────
+   DIRECTION B — WATT ARCADE
+   Saturated, chunky, pressable. The meter disc is the hero object.
+   ─────────────────────────────────────────────────────────── */
+.dir-b{
+  --ground:#E8F1DE; --card:#FFFFFF; --card-2:#F1F7EA; --border:#CFE0BE;
+  --plot:#A8D18A; --plot-edge:#87BA65; --plot-hot:#FFC93C;
+  --canopy:#23A055; --canopy-2:#16663A; --bark:#2B2118;
+  --ink:#14243A; --muted:#5A6A79; --primary:#178140; --primary-ink:#FFFFFF;
+  --flag:#D93B18; --panel:#14243A; --panel-ink:#E8F1DE;
+  --radius:22px; --btn-radius:16px; --card-shadow:0 2px 0 #CFE0BE;
+  --btn-shadow:0 4px 0 #16663A; --btn-shadow-press:0 1px 0 #16663A; --btn-press:3px;
+  --font-display:"Bricolage Grotesque",system-ui,sans-serif;
+  --font-body:"Outfit",system-ui,sans-serif;
+  --font-mono:"Space Grotesk",monospace;
+  --big-weight:800;
+}
+.dir-b .big{font-size:52px}
+.dir-b .btn{font-weight:600}
+.dir-b .pill{font-weight:700}
+.dir-b .hero{background:var(--plot);border-color:var(--plot-edge)}
+
+/* ───────────────────────────────────────────────────────────
+   DIRECTION C — GREENHOUSE
+   Soft, quiet, ambient. The sky carries the feedback.
+   ─────────────────────────────────────────────────────────── */
+.dir-c{
+  --ground:#E9EEE9; --card:#FFFFFF; --card-2:#F2F6F1; --border:#D9E2D7;
+  --plot:#D3DFCE; --plot-edge:#BACAB4; --plot-hot:#E3A05C;
+  --canopy:#3F6B4A; --canopy-2:#2A4C34; --bark:#4A3B2E;
+  --ink:#1B241D; --muted:#5C685C; --primary:#3F6B4A; --primary-ink:#FFFFFF;
+  --flag:#B45A2E; --panel:#2B3A55; --panel-ink:#E9EEE9;
+  --radius:24px; --btn-radius:999px; --card-shadow:0 1px 3px #1B241D0F;
+  --btn-shadow:none; --btn-shadow-press:none; --btn-press:1px;
+  --font-display:"Hanken Grotesk",system-ui,sans-serif;
+  --font-body:"Hanken Grotesk",system-ui,sans-serif;
+  --font-mono:"DM Mono",monospace;
+  --big-weight:700;
+}
+.dir-c .hero{border:0;padding:0 0 16px}
+.dir-c .hero .inner{padding:14px 14px 0}
+.dir-c .hero .tree-stage{height:220px}
+.sky{background:linear-gradient(#BFD9E8,#E4EFE2 62%,#E9EEE9)}
+.sky-dawn{background:linear-gradient(#E8C7A8,#F0DCC4 45%,#E7EBDF)}
+.sky-night{background:linear-gradient(#2B3A55,#4C6079 55%,#8C9A96)}
+.sky-haze{background:linear-gradient(#D6CFBE,#DED8C9 58%,#E4E4DA)}
+.dir-c .sky-night .label,.dir-c .sky-night .body{color:#E9EEE9}
+.dir-c .sky-night .mid{color:#FFFFFF}
+
+/* the meter disc, direction B only */
+.spin{animation:spin 2.6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <b>Evergreen — three directions</b>
+  <nav>
+    <a href="#a">A · Field Notes</a>
+    <a href="#b">B · Watt Arcade</a>
+    <a href="#c">C · Greenhouse</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="verdict">A · Field Notes is <b>locked</b> — its palette and type now live in <code>src/app/globals.css</code> and <code>DESIGN.md</code>. B and C are kept below as archived alternatives; do not build from them.</div>
+    <h1>Pick a tone. The mechanics are already decided.</h1>
+    <p>All three directions share the same structure: the tree owns the top of Home, the community
+    garden is an isometric plot where tree height <em>is</em> the ranking, and members over baseline
+    turn their tile amber. They differ only in how the app feels to hold. Every number below is real
+    seed data.</p>
+    <div class="fixes">
+      <span>tree is the hero, not the third card</span>
+      <span>isometric plot, not 25 emoji boxes</span>
+      <span>waste shows up as a place</span>
+      <span>one accent family, not six</span>
+      <span>hero number 42–52px</span>
+      <span>one primary action per screen</span>
+    </div>
+  </header>
+</div>
+
+<hr class="rule">
+
+<!-- ══════════════ A ══════════════ -->
+<section class="dir dir-a" id="a"><div class="wrap">
+  <div class="dir-head">
+    <div>
+      <span class="key">Direction A</span>
+      <h2>Field Notes</h2>
+    </div>
+    <div>
+      <p class="sig"><b>Signature: the entire interface is monospace.</b> An app about measurement,
+      set in the typeface of measurement. Flat fills, no gradients, no drop shadows — the plot and
+      the numbers do all the work.</p>
+      <p class="risk">Risk: all-mono at consumer scale reads as precise, or as a terminal. The 13px
+      body and open line-height are what decide which.</p>
+    </div>
+  </div>
+
+  <div class="tokens">
+    <div class="tok"><i style="background:#EDEFE6"></i><b>Ground</b><code>#EDEFE6</code><small>Page</small></div>
+    <div class="tok"><i style="background:#CBD9C0"></i><b>Plot</b><code>#CBD9C0</code><small>Isometric tiles</small></div>
+    <div class="tok"><i style="background:#E9A94B"></i><b>Leaking</b><code>#E9A94B</code><small>Over baseline</small></div>
+    <div class="tok"><i style="background:#4C7A4E"></i><b>Canopy</b><code>#4C7A4E</code><small>Foliage</small></div>
+    <div class="tok"><i style="background:#2F5A38"></i><b>Deep</b><code>#2F5A38</code><small>Primary, active nav</small></div>
+    <div class="tok"><i style="background:#2A2620"></i><b>Bark</b><code>#2A2620</code><small>Trunks, ink</small></div>
+    <div class="tok"><i style="background:#B23A2B"></i><b>Flag</b><code>#B23A2B</code><small>N leaking</small></div>
+  </div>
+
+  <div class="rack" data-screens="a"></div>
+
+  <div class="demo">
+    <h4>The plot carries the alert</h4>
+    <p>Same garden, two states. Nobody has to open an inbox to find out something is wrong — the
+    ground changes colour and the counter in the corner moves.</p>
+    <div class="demo-row">
+      <div class="demo-cell">
+        <span>all clear</span>
+        <div class="frame" style="background:#F6F8F1;border:1px solid #DCE2D3">
+          <div class="split" style="margin-bottom:6px">
+            <span class="label">Solar Squad</span>
+            <span class="num" style="color:#6E7C6B;font-size:12px">0 leaking</span>
+          </div>
+          <div data-plot data-stages="42513 23142 51423 14251 3243."></div>
+        </div>
+      </div>
+      <div class="demo-cell">
+        <span>four members over baseline</span>
+        <div class="frame" style="background:#F6F8F1;border:1px solid #DCE2D3">
+          <div class="split" style="margin-bottom:6px">
+            <span class="label">Solar Squad</span>
+            <span class="num" style="color:#B23A2B;font-size:12px">4 leaking</span>
+          </div>
+          <div data-plot data-stages="42513 23142 51423 14251 3243." data-hot="6,12,13,17"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<hr class="rule">
+
+<!-- ══════════════ B ══════════════ -->
+<section class="dir dir-b" id="b"><div class="wrap">
+  <div class="dir-head">
+    <div>
+      <span class="key">Direction B</span>
+      <h2>Watt Arcade</h2>
+    </div>
+    <div>
+      <p class="sig"><b>Signature: the meter disc.</b> The spinning disc from a real kWh meter sits
+      at the top of Home — fast when you are drawing power, slow when you are saving — with an
+      odometer minting points beneath it. Everything pressable has a 4px underside that collapses.</p>
+      <p class="risk">Risk: skeuomorphic meter plus hard-shadow buttons is loud. It either delights
+      or reads as a toy.</p>
+    </div>
+  </div>
+
+  <div class="tokens">
+    <div class="tok"><i style="background:#E8F1DE"></i><b>Field</b><code>#E8F1DE</code><small>Page</small></div>
+    <div class="tok"><i style="background:#A8D18A"></i><b>Plot</b><code>#A8D18A</code><small>Isometric tiles</small></div>
+    <div class="tok"><i style="background:#FFC93C"></i><b>Volt</b><code>#FFC93C</code><small>Leaking, points, streak</small></div>
+    <div class="tok"><i style="background:#178140"></i><b>Grass</b><code>#178140</code><small>Primary, active nav</small></div>
+    <div class="tok"><i style="background:#16663A"></i><b>Underside</b><code>#16663A</code><small>4px press shadow</small></div>
+    <div class="tok"><i style="background:#14243A"></i><b>Slate</b><code>#14243A</code><small>Ink, dark panels</small></div>
+    <div class="tok"><i style="background:#D93B18"></i><b>Flare</b><code>#D93B18</code><small>Over baseline</small></div>
+  </div>
+
+  <div class="rack" data-screens="b"></div>
+
+  <div class="demo">
+    <h4>Everything you can press has an underside</h4>
+    <p>Hold the button. The 4px slab collapses and the label drops with it — the same physical
+    feedback Duolingo uses to make a tap feel like an event rather than a state change.</p>
+    <div class="demo-row" style="align-items:center">
+      <button class="btn btn-primary" style="width:220px">Feed your tree</button>
+      <span style="font:400 13px/1.5 'Outfit',sans-serif;color:#5C6155;max-width:34ch">
+        <code style="font-family:'Space Grotesk',monospace">box-shadow: 0 4px 0 #16663A</code> →
+        <code style="font-family:'Space Grotesk',monospace">0 1px 0</code> on <code style="font-family:'Space Grotesk',monospace">:active</code>,
+        with a 3px translate.
+      </span>
+    </div>
+  </div>
+</div></section>
+
+<hr class="rule">
+
+<!-- ══════════════ C ══════════════ -->
+<section class="dir dir-c" id="c"><div class="wrap">
+  <div class="dir-head">
+    <div>
+      <span class="key">Direction C</span>
+      <h2>Greenhouse</h2>
+    </div>
+    <div>
+      <p class="sig"><b>Signature: the sky.</b> The gradient behind your tree tracks the real time
+      of day, and hazes over when you are above baseline. Feedback with no number attached — and a
+      reason the app looks different at 7am and at 11pm.</p>
+      <p class="risk">Risk: no celebration UI at all. Delight has to come from noticing your tree
+      changed, which is slower and quieter than a burst.</p>
+    </div>
+  </div>
+
+  <div class="tokens">
+    <div class="tok"><i style="background:#E9EEE9"></i><b>Haze</b><code>#E9EEE9</code><small>Page</small></div>
+    <div class="tok"><i style="background:#D3DFCE"></i><b>Plot</b><code>#D3DFCE</code><small>Isometric tiles</small></div>
+    <div class="tok"><i style="background:#E3A05C"></i><b>Ember</b><code>#E3A05C</code><small>Leaking, streak</small></div>
+    <div class="tok"><i style="background:#3F6B4A"></i><b>Canopy</b><code>#3F6B4A</code><small>Foliage, primary</small></div>
+    <div class="tok"><i style="background:#87A183"></i><b>Moss</b><code>#87A183</code><small>Secondary foliage</small></div>
+    <div class="tok"><i style="background:#2B3A55"></i><b>Dusk</b><code>#2B3A55</code><small>Night sky, data panel</small></div>
+    <div class="tok"><i style="background:#B45A2E"></i><b>Flag</b><code>#B45A2E</code><small>Over baseline</small></div>
+  </div>
+
+  <div class="rack" data-screens="c"></div>
+
+  <div class="demo">
+    <h4>Same screen, four skies</h4>
+    <p>Time of day sets the gradient. Being over baseline overrides it with haze — you can tell you
+    had a bad day before you read a single figure.</p>
+    <div class="demo-row" data-skies></div>
+  </div>
+</div></section>
+
+<hr class="rule">
+<div class="wrap" style="padding:34px 0 70px">
+  <p style="margin:0;max-width:74ch;font-size:14px;color:#5C6155">
+    Palettes are declared as scoped custom properties (<code style="font-family:'JetBrains Mono',monospace">.dir-a { --plot: … }</code>),
+    so the block belonging to the direction you pick lifts straight into the
+    <code style="font-family:'JetBrains Mono',monospace">@theme</code> block in
+    <code style="font-family:'JetBrains Mono',monospace">src/app/globals.css</code>. No Tailwind CDN here —
+    the current <code style="font-family:'JetBrains Mono',monospace">style.html</code> is built on v3 against a v4 app,
+    which is one of the things being fixed.
+  </p>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   ISOMETRIC PLOT
+   5×5 diamond. Tiles are coplanar so they paint in any order;
+   trees paint back-to-front by depth (col+row).
+   ═══════════════════════════════════════════════════════════ */
+const TW = 44, TH = 22, OX = 112, OY = 74;
+const iso = (c, r) => [OX + (c - r) * TW / 2, OY + (c + r) * TH / 2];
+
+function tilePts(c, r) {
+  const [x, y] = iso(c, r);
+  return `${x},${y - TH / 2} ${x + TW / 2},${y} ${x},${y + TH / 2} ${x - TW / 2},${y}`;
+}
+
+function tile(c, r, hot) {
+  return `<polygon points="${tilePts(c, r)}" fill="${hot ? "var(--plot-hot)" : "var(--plot)"}"
+    stroke="var(--plot-edge)" stroke-width="1"/>`;
+}
+
+/* the selected plot rings on top of everything, so the tree never hides it */
+function selRing(c, r) {
+  const [x, y] = iso(c, r);
+  return `<polygon points="${tilePts(c, r)}" fill="none" stroke="var(--card)" stroke-width="4"/>
+    <polygon points="${tilePts(c, r)}" fill="none" stroke="var(--ink)" stroke-width="2"/>
+    <circle cx="${x}" cy="${y - 46}" r="3.4" fill="var(--ink)"/>
+    <path d="M${x} ${y - 42} v6" stroke="var(--ink)" stroke-width="2"/>`;
+}
+
+/* six growth stages, matching STAGES [0,50,150,400,800,1500] in src/lib/points.ts */
+function tree(c, r, s) {
+  const [x, y] = iso(c, r);
+  if (s === 0) return `<ellipse cx="${x}" cy="${y - 1.5}" rx="4.2" ry="2.4" fill="var(--bark)" opacity=".8"/>`;
+  if (s === 1) return `
+    <rect x="${x - .9}" y="${y - 9}" width="1.7" height="9" fill="var(--bark)"/>
+    <ellipse cx="${x - 3.6}" cy="${y - 8}" rx="3.6" ry="2.3" transform="rotate(-24 ${x - 3.6} ${y - 8})" fill="var(--canopy)"/>
+    <ellipse cx="${x + 3.6}" cy="${y - 10}" rx="3.6" ry="2.3" transform="rotate(22 ${x + 3.6} ${y - 10})" fill="var(--canopy-2)"/>`;
+  const H = [0, 0, 13, 19, 25, 31][s];
+  const R = [0, 0, 5, 6.6, 8.1, 9.3][s];
+  const W = [0, 0, 1.7, 2.2, 2.7, 3.1][s];
+  const t = y - H;
+  let g = `<rect x="${x - W / 2}" y="${t}" width="${W}" height="${H + 1}" rx="${W / 2}" fill="var(--bark)"/>`;
+  g += `<circle cx="${x - R * .64}" cy="${t + R * .38}" r="${R * .74}" fill="var(--canopy-2)"/>`;
+  g += `<circle cx="${x + R * .64}" cy="${t + R * .32}" r="${R * .70}" fill="var(--canopy-2)"/>`;
+  g += `<circle cx="${x}" cy="${t - R * .22}" r="${R}" fill="var(--canopy)"/>`;
+  if (s === 5) {
+    g += `<circle cx="${x - R * .45}" cy="${t - R * .5}" r="1.9" fill="var(--card)"/>`;
+    g += `<circle cx="${x + R * .5}" cy="${t - R * .1}" r="1.7" fill="var(--card)"/>`;
+    g += `<circle cx="${x + R * .05}" cy="${t + R * .55}" r="1.6" fill="var(--card)"/>`;
+  }
+  return g;
+}
+
+function renderPlot(el) {
+  const stages = (el.dataset.stages || "").replace(/\s/g, "");
+  const hot = new Set((el.dataset.hot || "").split(",").filter(Boolean).map(Number));
+  const sel = el.dataset.sel === undefined ? -1 : Number(el.dataset.sel);
+
+  let tiles = "", trees = [];
+  for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) {
+    const i = r * 5 + c, ch = stages[i] || ".";
+    tiles += tile(c, r, hot.has(i));
+    if (ch !== ".") trees.push([c + r, tree(c, r, Number(ch))]);
+  }
+  trees.sort((a, b) => a[0] - b[0]);
+  el.innerHTML =
+    `<svg viewBox="0 0 224 188" role="img" aria-label="Community garden: 24 members, each tree at its growth stage">
+       ${tiles}${trees.map(t => t[1]).join("")}${sel >= 0 ? selRing(sel % 5, Math.floor(sel / 5)) : ""}
+     </svg>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HERO TREE — one big Mature Tree for the Home screen
+   ═══════════════════════════════════════════════════════════ */
+function heroTree() {
+  return `<svg viewBox="0 0 160 190" role="img" aria-label="Your tree: Mature Tree">
+    <ellipse cx="80" cy="180" rx="46" ry="8" fill="var(--plot)"/>
+    <rect x="74" y="92" width="12" height="90" rx="6" fill="var(--bark)"/>
+    <path d="M80 130 L58 112" stroke="var(--bark)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M80 120 L104 100" stroke="var(--bark)" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="48" cy="104" r="27" fill="var(--canopy-2)"/>
+    <circle cx="112" cy="98"  r="28" fill="var(--canopy-2)"/>
+    <circle cx="62" cy="70"  r="32" fill="var(--canopy)"/>
+    <circle cx="100" cy="64" r="30" fill="var(--canopy)"/>
+    <circle cx="80" cy="44"  r="30" fill="var(--canopy)"/>
+  </svg>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   14-DAY BAR CHART — mirrors charts/bar-chart.tsx
+   ═══════════════════════════════════════════════════════════ */
+function barChart(values, baseline) {
+  const BAR = 14, GAP = 6, H = 84;
+  const max = Math.max(...values, baseline) * 1.12;
+  const w = values.length * (BAR + GAP);
+  const bars = values.map((v, i) => {
+    const h = (v / max) * H, x = i * (BAR + GAP), y = H - h;
+    const over = v > baseline;
+    return `<rect x="${x}" y="${y}" width="${BAR}" height="${h}" rx="3"
+      fill="${over ? "var(--plot-hot)" : "var(--primary)"}" ${i < values.length - 1 ? 'opacity=".75"' : ""}/>`;
+  }).join("");
+  const by = H - (baseline / max) * H;
+  return `<svg viewBox="0 0 ${w} ${H + 4}" style="width:100%;height:auto" role="img"
+      aria-label="14 days of electricity use against the rolling baseline">
+    ${bars}
+    <line x1="0" y1="${by}" x2="${w}" y2="${by}" stroke="var(--muted)" stroke-dasharray="4 4" stroke-width="1.5"/>
+  </svg>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCREENS — identical content in all three, per-direction skin
+   Data from scripts/seed.ts: Solar Squad ☀️, goal 5000,
+   "Universal Studios group discount"; 1% under baseline = 10 pts.
+   ═══════════════════════════════════════════════════════════ */
+const KWH = [14.9, 13.8, 14.2, 12.6, 13.1, 15.4, 12.9, 12.2, 13.6, 11.9, 12.4, 14.8, 12.1, 11.8];
+const PLOT = { stages: "42513 23142 51423 14251 3243.", hot: "6,12,13,17", sel: "12" };
+
+const nav = on => {
+  const t = [["Home", "house"], ["Garden", "sprout"], ["Energy", "zap"], ["Rewards", "gift"], ["Profile", "user"]];
+  return `<div class="tabs">${t.map(([l, i]) =>
+    `<a href="#" ${l === on ? 'class="on" aria-current="page"' : ""}><i data-lucide="${i}"></i><span>${l}</span></a>`
+  ).join("")}</div>`;
+};
+
+/* — Home ————————————————————————————————— */
+function home(dir, skyClass) {
+  const sky = dir === "c" ? `<div class="hero ${skyClass || "sky"}"><div class="inner">` : `<div class="hero">`;
+  const skyEnd = dir === "c" ? `</div></div>` : `</div>`;
+
+  const meter = dir === "b" ? `
+    <div class="card">
+      <div class="split" style="align-items:flex-start">
+        <div>
+          <span class="label">Drawing now</span>
+          <div class="big" style="margin-top:6px">0.48<span style="font-size:20px"> kW</span></div>
+        </div>
+        <div class="disc" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="64" height="64">
+            <circle cx="32" cy="32" r="30" fill="var(--card-2)" stroke="var(--border)"/>
+            <g class="spin" style="transform-origin:32px 32px">
+              <path d="M32 4 A28 28 0 0 1 32 60 Z" fill="var(--plot-hot)"/>
+              <rect x="30.5" y="4" width="3" height="56" fill="var(--ink)" opacity=".55"/>
+            </g>
+            <circle cx="32" cy="32" r="6" fill="var(--card)" stroke="var(--border)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="odo" style="margin-top:12px">
+        <span class="label">Banked today</span>
+        <div class="num" style="font-size:22px;font-weight:700;color:var(--primary)">+180 pts</div>
+      </div>
+    </div>` : `
+    <div class="card">
+      <span class="label">This week vs baseline</span>
+      <div class="split" style="align-items:flex-end;margin-top:8px">
+        <div class="big good">−14.2%</div>
+        <div style="text-align:right">
+          <div class="num" style="font-size:17px">11.8 kWh</div>
+          <div class="label" style="margin-top:4px">avg / day</div>
+        </div>
+      </div>
+    </div>`;
+
+  return `
+  <div class="screen">
+    <div class="split">
+      <span class="label">Eusoff Block B</span>
+      <span class="pill"><i data-lucide="flame" style="width:13px;height:13px"></i> 5 day streak</span>
+    </div>
+
+    ${sky}
+      <div class="tree-stage">${heroTree()}</div>
+      <div class="split" style="margin-top:10px">
+        <span class="mid">Mature Tree</span>
+        <span class="num dim" style="font-size:12.5px">980 / 1,500</span>
+      </div>
+      <div class="bar" style="margin-top:9px"><i style="width:${Math.round((980 - 800) / 700 * 100)}%"></i></div>
+      <p class="body dim" style="margin-top:8px">520 points of fertilizer to Blossoming.</p>
+    ${skyEnd}
+
+    <div class="card">
+      <div class="split">
+        <div>
+          <span class="label">Fertilizer</span>
+          <div class="num" style="font-size:26px;font-weight:700;margin-top:5px">340 pts</div>
+        </div>
+        <i data-lucide="sprout" style="width:26px;height:26px;color:var(--primary)"></i>
+      </div>
+      <button class="btn btn-primary" style="margin-top:13px">Feed your tree</button>
+    </div>
+
+    ${meter}
+
+    <div class="card">
+      <div class="split">
+        <div>
+          <b style="font:600 13.5px/1.3 var(--font-body);color:var(--ink)">4 plots leaking in Solar Squad</b>
+          <small style="display:block;font:400 12px/1.4 var(--font-body);color:var(--muted);margin-top:3px">
+            Lounge AC has run since 02:00.</small>
+        </div>
+        <span class="pill flagged">4</span>
+      </div>
+    </div>
+  </div>
+  ${nav("Home")}`;
+}
+
+/* — Garden ———————————————————————————————— */
+const garden = () => `
+  <div class="screen">
+    <div class="split">
+      <span class="label">Solar Squad ☀️ · Level 3</span>
+      <span class="num hot" style="font-size:12.5px">4 leaking</span>
+    </div>
+
+    <div class="card plotwrap" style="padding:10px 8px 8px">
+      <div data-plot data-stages="${PLOT.stages}" data-hot="${PLOT.hot}" data-sel="${PLOT.sel}"></div>
+      <span class="tap">tap a plot</span>
+    </div>
+
+    <div class="card">
+      <div class="split">
+        <span class="label">Group goal</span>
+        <span class="num" style="font-size:12.5px">3,850 / 5,000</span>
+      </div>
+      <div class="bar" style="margin:9px 0 8px"><i style="width:77%"></i></div>
+      <p class="body">Universal Studios group discount, for all 24 of you.</p>
+    </div>
+
+    <div class="card">
+      <div class="split">
+        <div style="display:flex;align-items:center;gap:11px">
+          <span style="width:38px;height:38px;border-radius:999px;background:var(--card-2);
+            display:grid;place-items:center;font:600 14px/1 var(--font-mono);color:var(--primary)">W</span>
+          <div>
+            <b style="font:600 14px/1.3 var(--font-body);color:var(--ink)">weiling_nus</b>
+            <small style="display:block;font:400 12px/1.4 var(--font-body);color:var(--muted)">
+              Mature Tree · 420 pts given</small>
+          </div>
+        </div>
+        <span class="pill" style="background:var(--plot-hot);color:var(--ink)">leaking</span>
+      </div>
+      <button class="btn btn-primary" style="margin-top:13px">Nudge weiling_nus</button>
+    </div>
+  </div>
+  ${nav("Garden")}`;
+
+/* — Energy ———————————————————————————————— */
+const energy = () => `
+  <div class="screen">
+    <div class="split">
+      <span class="label">EcoVolt EV-402</span>
+      <span class="pill"><span style="width:6px;height:6px;border-radius:999px;background:var(--primary)"></span> live</span>
+    </div>
+
+    <div class="panel">
+      <span class="label">Electricity, today vs baseline</span>
+      <div class="big" style="margin:9px 0 4px">−18.6%</div>
+      <div class="num" style="opacity:.72;font-size:13px">14.5 kWh expected · 11.8 kWh used</div>
+    </div>
+
+    <div class="card">
+      <div class="split" style="margin-bottom:10px">
+        <span class="label">Last 14 days</span>
+        <span class="label">dashed = baseline</span>
+      </div>
+      <div data-chart></div>
+    </div>
+
+    <div class="card" style="padding:6px 16px">
+      <div class="row">
+        <span class="ico"><i data-lucide="zap"></i></span>
+        <div><b>Electricity</b><small>14.5 → 11.8 kWh</small></div>
+        <div class="end"><b class="good">−18.6%</b><small>+180 pts</small></div>
+      </div>
+      <div class="row">
+        <span class="ico"><i data-lucide="droplet"></i></span>
+        <div><b>Water</b><small>45 → 41 L</small></div>
+        <div class="end"><b class="good">−8.8%</b><small>+80 pts</small></div>
+      </div>
+    </div>
+
+    <div class="card" style="text-align:center">
+      <span class="label">How it converts</span>
+      <p class="body" style="margin-top:7px">Every <b>1%</b> under your baseline is
+        <b>10 points</b> of fertilizer.</p>
+    </div>
+
+    <button class="btn btn-primary">Sync meter</button>
+  </div>
+  ${nav("Energy")}`;
+
+/* — Rewards ——————————————————————————————— */
+const rewards = () => `
+  <div class="screen">
+    <div class="card">
+      <span class="label">Your fertilizer</span>
+      <div class="big" style="margin-top:8px">340<span style="font-size:19px"> pts</span></div>
+    </div>
+
+    <div class="card">
+      <div class="split">
+        <span class="label">Solar Squad goal</span>
+        <span class="num" style="font-size:12.5px">3,850 / 5,000</span>
+      </div>
+      <div class="bar" style="margin:9px 0 9px"><i style="width:77%"></i></div>
+      <p class="body" style="margin-bottom:12px">
+        <b>Universal Studios group discount</b> — 1,150 points short. Nobody gets it alone.</p>
+      <button class="btn btn-primary">Contribute points</button>
+    </div>
+
+    <div class="card" style="padding:6px 16px">
+      <div class="row">
+        <span class="ico"><i data-lucide="lock"></i></span>
+        <div><b>Escape room night</b><small>Compost Crew · 2,940 / 4,000</small></div>
+        <div class="end"><b class="num" style="font-size:13px">74%</b></div>
+      </div>
+      <div class="row">
+        <span class="ico"><i data-lucide="cup-soda"></i></span>
+        <div><b>LiHO bubble tea</b><small>Any regular drink</small></div>
+        <div class="end"><b class="num" style="font-size:13px">200 pts</b></div>
+      </div>
+      <div class="row">
+        <span class="ico"><i data-lucide="utensils"></i></span>
+        <div><b>$5 GrabFood credit</b><small>Orders above $15</small></div>
+        <div class="end"><b class="num" style="font-size:13px">300 pts</b></div>
+      </div>
+    </div>
+  </div>
+  ${nav("Rewards")}`;
+
+/* ═══════════════════════════════════════════════════════════
+   MOUNT
+   ═══════════════════════════════════════════════════════════ */
+const SCREENS = [["Home", home], ["Garden", garden], ["Energy", energy], ["Rewards", rewards]];
+
+document.querySelectorAll(".rack").forEach(rack => {
+  const dir = rack.dataset.screens;
+  rack.innerHTML = SCREENS.map(([name, build]) =>
+    `<div class="slot"><h3>${name}</h3><div class="phone">${build(dir)}</div></div>`
+  ).join("");
+});
+
+/* direction C sky strip */
+const skies = document.querySelector("[data-skies]");
+if (skies) {
+  [["dawn · 6am", "sky-dawn"], ["clear · midday", "sky"], ["dusk", "sky-night"], ["over baseline", "sky-haze"]]
+    .forEach(([label, cls]) => {
+      const cell = document.createElement("div");
+      cell.className = "demo-cell";
+      cell.style.width = "224px";
+      cell.innerHTML = `<span>${label}</span>
+        <div class="hero ${cls}" style="border-radius:18px;padding:0 0 14px">
+          <div class="inner" style="padding:12px 12px 0">
+            <div class="tree-stage" style="height:150px">${heroTree()}</div>
+            <div class="split" style="margin-top:8px">
+              <span class="mid" style="font-size:17px">Mature Tree</span>
+              <span class="num" style="font-size:12px;opacity:.7">980 / 1,500</span>
+            </div>
+          </div>
+        </div>`;
+      skies.appendChild(cell);
+    });
+}
+
+document.querySelectorAll("[data-plot]").forEach(renderPlot);
+document.querySelectorAll("[data-chart]").forEach(el => { el.innerHTML = barChart(KWH, 14.5); });
+
+lucide.createIcons();
+</script>
+
+</body>
+</html>
