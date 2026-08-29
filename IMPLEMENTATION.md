@@ -69,7 +69,9 @@ Goal: Running Next.js 16 app with Supabase auth, seeded database, light-theme de
 - [x] `src/proxy.ts` — Next 16's middleware equivalent (the `middleware.ts` rename). Refreshes the Supabase session cookie on every request and redirects anonymous traffic to `/login`. **Load-bearing for the entire auth story** — `requireProfile()` alone does not cover it.
 - [x] `scripts/seed.ts` — Mulberry32 deterministic PRNG seeding 22 users (including `tejas.sunil@u.nus.edu`), 3 groups (Solar Squad, Compost Crew, Tide Turners), 21 days of EcoVolt energy/water readings, ledger earn/contribution transactions, and sample alerts. Demo-stage tuning lives in the constants at the top (`DEMO_GROUP_SIZE`, `DEMO_GROUP_FILL`, `DEMO_WALLET_RESERVE`); the printed summary reports the pitch's unlock gap and asserts the demo wallet covers it.
 - [x] `src/lib/points.ts` — Core points math: `earnFor(baseline, actual)` ($1\% = 10\text{ pts}$), `treeStage(contributed)` (0–5), `STAGES` $[0, 50, 150, 400, 800, 1500]$, and date helpers.
-- [ ] **Apply `supabase/schema.sql` to the live Supabase project.** The file is ahead of the deployed database — `bun run seed` currently fails with `column groups.goal_points does not exist`. Run the whole file in the Supabase SQL editor; it is idempotent, so re-running is safe. **This must happen before every fresh seed.**
+- [x] **Apply `supabase/schema.sql` to the live Supabase project.** Applied 2026-08-29. The file is idempotent, so re-running is safe. **This must happen before every fresh seed.** Two ways to run it:
+  - `bun run db:push` — needs `SUPABASE_DB_URL` in `.env.local` (see `.env.local.example`). Point it at the **pooler on port 6543**; port 5432 is firewalled on the NUS network, which is also why `supabase db query --linked` hangs at `Initialising login role...`.
+  - Or paste the file into the Supabase SQL editor. Required for the `storage.objects` policies if the pooler role isn't their owner.
 
 ### Frontend Shell & UI Kit
 - [x] Next.js 16 + React 19 + Tailwind CSS v4 + TypeScript strict setup.
@@ -84,10 +86,21 @@ Goal: Running Next.js 16 app with Supabase auth, seeded database, light-theme de
 
 **Done when:** `supabase/schema.sql` has been applied to the live project; `bun run seed` populates Supabase and prints `Pitch unlock beat: … YES`; logging in with `tejas.sunil@u.nus.edu` / `12345678` navigates through onboarding to a rendered dashboard at `/`.
 
-**Status: NOT complete.** Two blockers, both of which Phase 1 clears:
-- `src/app/page.tsx` was deleted and no `(authed)/page.tsx` exists yet, so the post-login
-  `router.replace("/")` 404s. The authed shell renders for nothing until Phase 1 lands.
-- `supabase/schema.sql` has not been applied to the live database, so `bun run seed` fails.
+**Status: complete (2026-08-29).** Both blockers cleared:
+- Schema applied; `bun run seed` prints `Pitch unlock beat: contribute 249 pts to Solar Squad -- wallet covers it: YES`.
+  Demo user: earned 2330, wallet 1282. Solar Squad 4751/5000 (20 members), Compost Crew 2026/4000, Tide Turners 3807/6000.
+- `src/app/(authed)/page.tsx` now exists so the post-login `router.replace("/")` lands. It is a
+  **placeholder**: wallet card + one mini-tree per community only. The 7-day chart, monthly stat
+  cards and leaderboard are still Phase 1's checklist below, unticked.
+
+Known gaps carried into later phases:
+- Every seeded account already has a `username`, so the demo user skips `/onboarding` and goes
+  straight to `/`. To exercise the onboarding path, null that user's `username` first.
+- The other four nav tabs (`/garden`, `/energy`, `/vouchers`, `/profile`) and the header bell
+  (`/alerts`) 404 until Phases 2–4.5 land.
+- The mini-tree stage on `/` is the **user's own** contribution to that group, not the group total:
+  `STAGES` caps at 1500 while every `goal_points` is 4000+, so a group-total tree would read
+  Blossoming permanently. The goal progress bar is still the group total, per AGENTS.md.
 
 Everything else in this phase's checklist is verified against the working tree.
 
@@ -98,7 +111,7 @@ Everything else in this phase's checklist is verified against the working tree.
 Goal: Logged-in user sees live wallet balance, assigned community trees, 7-day earning trend, monthly impact, and global ranking.
 
 ### Backend & Data Queries
-- [ ] Implement dashboard data aggregation in `src/app/(authed)/page.tsx`:
+- [x] Implement dashboard data aggregation in `src/app/(authed)/page.tsx`:
   - Calculate user wallet balance: `sum(earn) - sum(contribute) - sum(redeem)` from `ledger`.
   - Fetch assigned groups from `group_memberships` with per-group contribution totals and tree stages.
   - Fetch last 7 days of energy readings for the user with calculated baseline and points earned.
@@ -106,17 +119,31 @@ Goal: Logged-in user sees live wallet balance, assigned community trees, 7-day e
   - Query all-time global leaderboard (`sum(points)` where `kind='earn'`) joined with `profiles`, computing current user's national rank.
 
 ### Frontend Components
-- [ ] Top Wallet Card: prominent points balance, "+ Earned this week" tag, and quick-action shortcuts.
-- [ ] "My Community Trees" carousel/grid: displays one mini-tree per assigned group with group emoji, name, contributed points, stage badge, and direct link to `/garden/[groupId]`.
-- [ ] 7-Day Energy Impact Chart: integrates `BarChart` showing daily kWh vs baseline and daily points earned.
-- [ ] Monthly Contribution Stat Cards: Total kWh saved, Water saved (L), CO2 offset (kg), and Trees tended.
-- [ ] Global Leaderboard preview: Top 5 users with medals/badges, plus fixed row for current user with rank #.
+- [x] Top Wallet Card: prominent points balance, "+ Earned this week" tag, and quick-action shortcuts.
+- [x] "My Community Trees" carousel/grid: displays one mini-tree per assigned group with group emoji, name, contributed points, stage badge, and direct link to `/garden/[groupId]`.
+- [x] 7-Day Energy Impact Chart: integrates `BarChart` showing daily kWh vs baseline and daily points earned.
+- [x] Monthly Contribution Stat Cards: Total kWh saved, Water saved (L), CO2 offset (kg), and Trees tended.
+- [x] Global Leaderboard preview: Top 5 users with medals/badges, plus fixed row for current user with rank #.
 
 **Done when:** for the seeded demo user, the wallet figure on `/` equals a hand-computed
 $\sum \text{earn} - \sum \text{contribute} - \sum \text{redeem}$ from the `ledger` table; each
 mini-tree's stage matches `treeStage()` applied to that group's contribution total; and the
 leaderboard rank matches an `order by sum(points) desc` over `kind='earn'`. Deploy to Vercel and
 confirm the same three numbers on the deployed URL.
+
+**Status: built and verified locally (2026-08-29); Vercel deploy still outstanding.**
+Verified by rendering `/` through the dev server with a real `@supabase/ssr` cookie (same RLS path
+as production), then diffing against an independent query script: wallet **1,282**, +760 earned this
+week, Solar Squad 4,751/5,000, Compost Crew 2,026/4,000, rank **#1 of 19**, streak 21d.
+
+Two open decisions, both deliberate deviations rather than bugs:
+- **Mini-tree stage is the user's own giving, not the group total** — contradicts this section's
+  literal "Done when" text above. `STAGES` caps at 1,500 while every `goal_points` is 4,000+, so a
+  group-total tree is permanently stage 5 and conveys nothing. The group total still drives the
+  goal bar. Either accept this or raise `STAGES`; don't "fix" it back.
+- **DESIGN.md and this checklist disagree on the Home screen.** DESIGN wants a full-bleed hero tree
+  at ~45% viewport above the wallet plus a leaking-count callout; this checklist has neither and
+  puts the wallet first. The checklist was followed. Decide which doc wins before Phase 5 polish.
 
 ---
 
@@ -125,25 +152,62 @@ confirm the same three numbers on the deployed URL.
 Goal: Interactive communal garden showing all group members' trees on a 5×5 plot with search, inspection, and peer nudging.
 
 ### Backend & Data Actions
-- [ ] Dynamic route `/garden/[groupId]`, plus `/garden` which redirects to the user's **default group**. There is no "primary group" concept in `group_memberships` (composite PK, no ordering column), so **define the default as the lowest `group_id` the user belongs to** — deterministic, no schema change. `requireProfile()` already returns the full `groups` array; pick from it, don't re-query. Note `params` is a Promise in Next 16 — `const { groupId } = await params`.
-- [ ] Fetch all group members, their profiles, and total points contributed to this specific group.
-- [ ] Group goal progress query: calculate $\sum \text{contributions}$ vs `groups.goal_points` and percentage.
-- [ ] Server Action `sendNudge(targetUserId, groupId)`: inserts `events` record (`kind='nudge'`). **De-duplication is best-effort only** — `events` has no `day` column and no unique index, so a same-day repeat check is an app-side `created_at::date` query and is racy under double-taps. Disable the button optimistically after the first tap; do not claim the constraint is enforced. Hardening it means a unique index on `(from_user, to_user, kind, (created_at::date))`.
+- [x] Dynamic route `/garden/[groupId]`, plus `/garden` which redirects to the user's **default group**. There is no "primary group" concept in `group_memberships` (composite PK, no ordering column), so **define the default as the lowest `group_id` the user belongs to** — deterministic, no schema change. `requireProfile()` already returns the full `groups` array; pick from it, don't re-query. Note `params` is a Promise in Next 16 — `const { groupId } = await params`.
+- [x] Fetch all group members, their profiles, and total points contributed to this specific group.
+- [x] Group goal progress query: calculate $\sum \text{contributions}$ vs `groups.goal_points` and percentage.
+- [x] Server Action `sendNudge(targetUserId, groupId)`: inserts `events` record (`kind='nudge'`). **De-duplication is best-effort only** — `events` has no `day` column and no unique index, so a same-day repeat check is an app-side `created_at::date` query and is racy under double-taps. Disable the button optimistically after the first tap; do not claim the constraint is enforced. Hardening it means a unique index on `(from_user, to_user, kind, (created_at::date))`.
 
 ### Frontend Components
-- [ ] Garden Top Header: Group selector dropdown (for multi-group users), total group tree canopy summary, and communal goal progress bar.
-- [ ] Isometric 5×5 Plot (`src/components/garden/plot.tsx`, client leaf) — **not** a grid of boxes:
+- [x] Garden Top Header: Group selector dropdown (for multi-group users), total group tree canopy summary, and communal goal progress bar.
+- [x] Isometric 5×5 Plot (`src/components/garden/plot.tsx`, client leaf) — **not** a grid of boxes:
   - 25 tiles in 2:1 isometric projection, each member’s tree at its true stage ($0 - 5$), so height alone conveys rank. Geometry, paint order and tuned tree scale are in `DESIGN.md`; reference implementation is `tile()` / `tree()` / `selRing()` in `styles.html`.
   - Members over baseline fill their tile `plot-hot` and increment an `N leaking` counter in the plot header.
   - **Plot order must be stable.** No table stores a plot/slot position, so derive it — **sort members by `user_id`** and fill the grid in that order. Sorting by contributions would make plots jump every time anyone contributes, including live on stage.
-  - Username label and contribution badge under each tree.
+  - ~~Username label and contribution badge under each tree.~~ **Dropped deliberately — this
+    contradicts DESIGN.md's locked plot rule ("Height is the ranking… No numbers, no leaderboard
+    row, no legend").** Username, stage name and points-given live in the inspector and in each
+    plot's `aria-label` instead. If you want the labels back, change DESIGN.md first.
   - Empty plots rendered as bare tiles, no tree. `tap a plot` is the inspector affordance. The demo group seeds 20 members (`DEMO_GROUP_SIZE`), so expect 5 bare tiles, not 17.
   - **Groups may exceed 25 members** — nothing in the schema caps them. Render the first 25 by the sort order above and show a "+N more" affordance rather than overflowing the grid.
-- [ ] Live Member Search: Instant filter input to find a member by username and highlight/zoom to their tree.
-- [ ] Tree Inspector Drawer / Modal: Clicking any tree opens member card with avatar, username, stage name, points contributed, and "Send Leaf Nudge" button.
-- [ ] Slacker Detection: Peer highlight indicator if a user logged zero savings yesterday.
+- [x] Live Member Search: Instant filter input to find a member by username and highlight/zoom to their tree.
+- [x] Tree Inspector Drawer / Modal: Clicking any tree opens member card with avatar, username, stage name, points contributed, and "Send Leaf Nudge" button.
+- [x] Slacker Detection: Peer highlight indicator if a user logged zero savings yesterday.
 
 **Done when:** Tapping any tree opens member inspector; search instantly highlights plots; sending a nudge creates an event in the database and provides visual feedback.
+
+**Status: built and verified (2026-08-29), including in a real browser.**
+- `/garden` → 307 → `/garden/1` (lowest group id). `/garden/3` (not a member) → 404.
+- Solar Squad renders 25 tiles / 20 trees / **5 bare plots**, 4 tiles `plot-hot` with a matching
+  `4 leaking` header count, goal `4,751 / 5,000`, `249 points short`.
+- **Tap → inspector confirmed in Chrome**: selecting grace.ho's plot moved the selection ring and
+  swapped the inspector to `Young Tree · 494 pts given`. **Search confirmed**: typing `liang.zw`
+  pins and rings that plot and fills the inspector. Each tile is a real `button` with an
+  `aria-label` like `"ben.lim, Seed, leaking"`.
+- `sendNudge` was verified by a live insert through the `send nudge` RLS policy (`events.id = 3`).
+  **That row cannot be deleted** — there is no `delete` grant on `events` — so the demo user has one
+  pre-existing sent nudge. Every nudge you fire while testing is permanent; budget for that on stage.
+- **Nudge de-duplication is optimistic client-side only** and is racy under double-taps. It is not
+  and cannot be enforced without a unique index on `(from_user, to_user, kind, (created_at::date))`,
+  which would be a schema change. Do not describe it as guaranteed.
+- Group selector is a row of `<Link>` pills, not a dropdown — no JS, same job.
+
+**Revised 2026-08-29 (later same day).** The verification record above is left as written — it was
+true when made — but three things changed after it. Re-verified in Chrome against the same seed:
+- **The goal is now a banner at the top of the screen**, above the search input, with per-goal
+  artwork and the shortfall as a 36px hero number (`249` / `points short`). It is no longer passed
+  to `<Plot>` as `children`; that prop is gone. New: `garden/goal-banner.tsx`, `garden/goal-art.tsx`.
+- **"Leaking" is retired from the UI.** Header reads `4 not earning`; the inspector reads
+  `Using 5% more power than usual today.` with a `+5% vs usual` pill; aria-labels read
+  `ben.lim, Seed, using 5% more power than usual`. Percentages verified against the DB for
+  day 2026-08-28: ben.lim +4.9→5, chloe.ng +5.9→6, daniel.koh +3.8→4, noah.p +1.1→1.
+  The header deliberately does **not** say "over their usual": the predicate is `earnFor() === 0`,
+  which fires from ~0.5% *under* baseline up, so an aggregate cannot claim everyone is over.
+  Per-member copy branches on that in `garden/over-usual.ts`, which has a test beside it
+  (`bun src/components/garden/over-usual.test.ts`). The `overPct === 0` branch has **no live
+  seeded case** — it is covered by that test only, not by anything in the browser.
+- **Your own plot carries a permanent hollow leaf marker.** aria-label reads
+  `tejasbuilds, your plot, Young Tree`. Verified it survives searching for someone else, and that
+  selecting your own plot suppresses the solid selection dot so the two never stack at `y-46`.
 
 ---
 

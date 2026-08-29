@@ -97,6 +97,19 @@ const { error: profErr } = await admin
   });
 if (profErr) throw profErr;
 
+// A profile row that already existed with a NULL username never gets one from the
+// upsert above (ignoreDuplicates), so that account lands on the leaderboard blank and
+// no re-seed can repair it. Fill only the nulls — a username someone actually picked
+// is still left alone.
+for (const u of users) {
+  const { error } = await admin
+    .from("profiles")
+    .update({ username: u.username })
+    .eq("id", u.id)
+    .is("username", null);
+  if (error) throw new Error(`username backfill for ${u.email}: ${error.message}`);
+}
+
 // ---- memberships ------------------------------------------------------------
 const memberships = users.map((u, i) => ({ user_id: u.id, group_id: groups[i % groups.length].id }));
 const demo = users.find((u) => u.email === DEMO_EMAIL)!;

@@ -6,6 +6,11 @@ Light theme only. Mobile-first single column (`max-w-md`, set in `src/app/layout
 rendering of every screen is direction A in `styles.html`. `style.html` is the superseded
 "Royal Field" mockup, kept only as the before-picture — do not take anything from it.
 
+`styles.html` is **superseded on two points**, and this file wins on both: it still renders the
+goal card *below* the plot and still says `N leaking` in the Garden header. Both changed — see
+[The goal banner](#the-goal-banner) and the over-baseline bullet under [The plot](#the-plot).
+The mockup is a locked artefact; do not retouch it, just don't copy those two things back.
+
 The idea in one line: **an app about measurement, set in the typeface of measurement.** Flat
 vector, restrained sage, one monospace face, a lot of empty space around each object. It should
 read as a precise instrument that happens to be beautiful, not as a game with a chart bolted on.
@@ -106,9 +111,19 @@ The community garden is a 5×5 diamond in isometric projection. Reference implem
 - **Height is the ranking.** Each member's tree renders at its true stage, so a Blossoming tree
   visibly towers over a Seed. No numbers, no leaderboard row, no legend. This is the social
   pressure mechanic; a grid of equal cells destroys it.
-- **Leaking tiles.** A member over baseline — or an open group waste alert — fills their tile
-  `plot-hot` and increments an `N leaking` counter (in `flag`) in the plot header. Waste becomes
-  a *place* on the map rather than an inbox item.
+- **Over-baseline tiles.** A member who earned no points that day — or an open group waste alert
+  — fills their tile `plot-hot` and increments an `N over their usual` counter (in `flag`) in the
+  plot header. Waste becomes a *place* on the map rather than an inbox item.
+  - **Never say "leaking" in the UI, and never state a percentage unconditionally.** The flag is
+    "earned zero points", which rounds in anyone from ~0.5% *under* baseline upward, so a member
+    can be flagged without actually being over. Copy branches on that and lives in one place,
+    `src/components/garden/over-usual.ts`, with a test beside it. "Using 6% more power than usual
+    today." when genuinely over; "No savings against their usual today." when not.
+- **Your own plot carries a leaf marker**, always drawn, at the same `y − 46` anchor as the
+  selection pin. It is told apart by *silhouette*, not colour — `primary` and `foreground` are
+  near-identical in value, so a colour-only difference would be invisible. Selection is a round
+  dot on a stem; you are a leaf on a stem. When you select your own plot the selection dot is
+  suppressed so the two never stack.
 - **Empty plots are bare tiles**, no tree.
 - **`tap a plot`** is the inspector affordance: 12.5px, `muted`, dotted underline, centred under
   the plot. Tapping opens the member card — avatar, username, stage name, points given to this
@@ -126,12 +141,47 @@ The community garden is a 5×5 diamond in isometric projection. Reference implem
 Alerts keep the header bell and its unread dot (`src/app/(authed)/layout.tsx` already computes
 the count), but the plot is where waste actually gets noticed.
 
+## The goal banner
+
+The community goal is the payoff of the whole loop, so on Garden it **leads the screen**, above
+the plot — not a footnote under it. `src/components/garden/goal-banner.tsx`: artwork tile, a
+lucide badge in the 32px `rounded-[9px] surface-muted` chip (`Lock` while short, `Sparkles` once
+reached), the goal title as the row title, the `given / goal` ratio, the 8px bar, and one
+sentence. Copy stays on-voice — "249 points short. Nobody gets it alone."
+
+**Documented exception to non-negotiable 3.** The per-goal artwork in
+`src/components/garden/goal-art.tsx` is *decorative* — it encodes no state, which
+"every colour encodes state… there is no decorative accent in this palette" otherwise forbids.
+This was a deliberate product call: the reward is what the whole mechanic is selling, and a
+text-only card undersold it. The exception is **scoped to the goal banner and nothing else** —
+do not treat it as licence for decoration anywhere in the app. Every other rule still binds the
+artwork: flat token fills only, no gradients, no shadows, no opacity ramps, no hex.
+
+**And the exception is fenced.** Goal art may use only the neutral and growth tokens —
+`surface-muted` (the plate), `surface`, `plot`, `plot-edge`, `foreground`, `primary`, `bark`,
+`canopy`, `canopy-deep`. It may **never** use `plot-hot` or `flag`. Those two are the app's
+alarm channel, and this art sits directly above a plot where amber means "wasting energy";
+decorative amber there reads as a false positive. So rule 3 narrows rather than dissolves:
+**the two state colours are never decorative.** The first draft of the coaster used `plot-hot`
+for the car and had to be repainted — that is the mistake this fence exists to catch.
+
+One drawing note worth keeping: a curved track alone reads as a **line chart**, which is the
+worst possible misread in an app full of bar charts. The vertical struts and the wheeled car are
+load-bearing, not ornament.
+
+Artwork is keyed by `groups.id` with a generic fallback, so a new community renders rather than
+crashes. To swap in a real image, drop it at `public/goals/<name>.png` and set `image` on that
+group's entry — the component prefers an image whenever one is present and renders it with a
+plain `<img>` (as `Avatar` does), which deliberately avoids `next/image` and its remote-pattern
+config. Note `vouchers.emoji` already holds a per-goal glyph (🎢 / 🔐 / 🏖️) if a cheaper badge is
+ever wanted; the banner does not read it, to save a query.
+
 ## Screens
 
 | Screen | Top to bottom | Primary action |
 |---|---|---|
 | **Home** `/` | status + streak pill · tree hero with stage name and progress to next stage · fertilizer wallet · this week vs baseline · leaking-count callout | Feed your tree |
-| **Garden** `/garden/[groupId]` | group name + `N leaking` · the plot + `tap a plot` · group goal bar · member inspector | Nudge `<username>` |
+| **Garden** `/garden/[groupId]` | group name + `N over their usual` · goal banner with artwork · the plot + `tap a plot` · member inspector | Nudge `<username>` |
 | **Energy** `/energy` | device + live pill · today vs baseline on the dark `panel` · 14-day bar chart with dashed baseline · electricity/water breakdown · conversion explainer | Sync meter |
 | **Rewards** `/vouchers` | wallet · group goal with progress and shortfall · locked group quests · personal catalogue | Contribute points |
 
@@ -171,10 +221,17 @@ appears as the device identity *inside* the Energy screen (`EcoVolt EV-402 · li
 - `ui/StatCard` — label + big value + caption + lucide icon.
 - `ui/ProgressBar` — track `bg-surface-muted`, fill `bg-primary`, CSS width transition.
 - `ui/Avatar` — image, or initial letter in `primary` on `bg-surface-muted`.
-- `charts/BarChart` — server-rendered SVG, no chart lib. Days over baseline fill `plot-hot`,
-  days under fill `primary`; the most recent day is full opacity, earlier days 75%. The baseline
-  is a dashed `stroke-bark` line at full opacity — it crosses `primary`-filled bars, and anything
-  lighter (`muted`, or `foreground` at 40%) disappears exactly where it has to be read.
+- `charts/BarChart` — server-rendered, no chart lib, and **CSS rather than SVG on purpose**.
+  Days over baseline are `bg-plot-hot`, days under are `bg-primary`, all at full opacity. The
+  baseline is a dashed `border-bark` rule — it crosses `primary` bars, and anything lighter
+  (`muted`, or `foreground` at 40%) disappears exactly where it has to be read.
+  - **Never rebuild this as a stretched SVG.** It was one: `viewBox "0 0 168 105"` with `w-full`
+    scaled everything ~1.9× on a phone, so `fontSize={8}` painted at ~15px against a scale whose
+    micro-label is 11.5px — and the factor moved with the container, so no fixed size could be
+    right. Any chart whose text lives inside a `w-full` SVG has this bug. Bars flex in CSS; text
+    is text.
+  - The old version also faded earlier bars to 75%, which broke "no opacity ramps". Recency is
+    not a state worth a colour here — the labels already carry the date.
 - `Tree` — client leaf; 6 inline SVG stages, flat `canopy` / `canopy-deep` / `bark` fills,
   crossfade + scale via `AnimatePresence`. Blossoms are `surface`.
 - `nav/BottomNav` — the five tabs above.
