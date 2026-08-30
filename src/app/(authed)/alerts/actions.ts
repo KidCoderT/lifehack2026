@@ -11,12 +11,13 @@ export type ResolveResult = { ok: boolean; points?: number; error?: string };
  * Everything load-bearing happens inside the `resolve_alert` Postgres function, not here:
  * clients may never insert `earn` (the "spend own points" policy allows contribute/redeem
  * only), so a security-definer function is the single sanctioned path. It also claims the
- * alert atomically (`... and status = 'open'`), which is why two people tapping at once
- * cannot both be paid — unlike contributePoints, this is not a read-then-write race.
+ * alert atomically (the status predicate lives inside the UPDATE), which is why two people
+ * tapping at once cannot both be paid — unlike contributePoints, this is not a read-then-write
+ * race. Reporting no longer closes an alert: a `fixed` claim also matches a `reported` row.
  *
- * A return of 0 means the function matched no row: someone already resolved it, it is not
- * an alert, or it belongs to a community you are not in. That is a normal outcome, not an
- * error, so it gets its own copy rather than a failure message.
+ * A return of 0 means the function matched no row: it is already fixed, you have already used
+ * your one action on it, it is not an alert, or it belongs to a community you are not in. That
+ * is a normal outcome, not an error, so it gets its own copy rather than a failure message.
  */
 export async function resolveAlert(
   eventId: number,
@@ -38,7 +39,7 @@ export async function resolveAlert(
 
   const points = Number(data ?? 0);
   if (points === 0) {
-    return { ok: false, error: "Someone already handled this one." };
+    return { ok: false, error: "Already handled, or you've had your turn on this one." };
   }
 
   revalidatePath("/alerts");

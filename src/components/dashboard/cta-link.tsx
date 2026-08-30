@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
+import { TAP } from "@/components/fx/motion-config";
 
 const MotionLink = motion.create(Link);
 
@@ -24,7 +25,7 @@ export function CtaLink({
   return (
     <MotionLink
       href={href}
-      whileTap={{ scale: 0.97 }}
+      whileTap={TAP}
       className={`flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-[15px] font-bold ${
         variant === "primary" ? "bg-primary text-primary-foreground" : "bg-surface-muted text-foreground"
       } ${className}`}

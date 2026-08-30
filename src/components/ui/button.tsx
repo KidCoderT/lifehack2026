@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import type { ComponentProps } from "react";
+import { TAP } from "@/components/fx/motion-config";
 
 const VARIANTS = {
   primary: "bg-primary text-primary-foreground",
@@ -19,7 +20,7 @@ export function Button({
 }) {
   return (
     <motion.button
-      whileTap={{ scale: 0.97 }}
+      whileTap={TAP}
       className={`rounded-xl px-5 py-3.5 text-[15px] font-bold disabled:opacity-50 ${VARIANTS[variant]} ${className}`}
       {...props}
     >

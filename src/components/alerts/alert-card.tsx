@@ -15,6 +15,11 @@ export type AlertRow = {
   photoUrl: string | null;
   resolvedByName: string | null;
   createdAt: string;
+  /** `reported` is a half state: confirmed real, still broken, still fixable by someone else. */
+  reportPhotoUrl?: string | null;
+  reportedByName?: string | null;
+  /** What the viewer already spent their one action on, if anything. */
+  viewerAction?: "fixed" | "reported" | null;
 };
 
 const FIX_POINTS = 100;
@@ -26,10 +31,15 @@ export function AlertCard({ alert, userId }: { alert: AlertRow; userId: string }
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [awarded, setAwarded] = useState<number | null>(null);
+  const [done, setDone] = useState<{ action: "fixed" | "reported"; points: number } | null>(
+    null,
+  );
   const [pending, startTransition] = useTransition();
 
-  const settled = alert.status !== "open" || awarded !== null;
+  // Only `fixed` settles a card. A reported alert is still broken, so it keeps the alarm icon.
+  const fixed = alert.status === "fixed" || done?.action === "fixed";
+  const acted = done?.action ?? alert.viewerAction ?? null;
+  const canAct = !fixed && !acted;
 
   function pick(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -71,7 +81,7 @@ export function AlertCard({ alert, userId }: { alert: AlertRow; userId: string }
         setError(res.error ?? "That didn't go through.");
         return;
       }
-      setAwarded(res.points ?? 0);
+      setDone({ action, points: res.points ?? 0 });
     });
   }
 
@@ -80,10 +90,10 @@ export function AlertCard({ alert, userId }: { alert: AlertRow; userId: string }
       <div className="flex items-start gap-3">
         <span
           className={`flex size-8 shrink-0 items-center justify-center rounded-[9px] ${
-            settled ? "bg-surface-muted text-muted" : "bg-surface-muted text-flag"
+            fixed ? "bg-surface-muted text-muted" : "bg-surface-muted text-flag"
           }`}
         >
-          {settled ? <Check className="size-4" /> : <TriangleAlert className="size-4" />}
+          {fixed ? <Check className="size-4" /> : <TriangleAlert className="size-4" />}
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-[13.5px] leading-snug font-semibold">{alert.message}</p>
@@ -100,25 +110,37 @@ export function AlertCard({ alert, userId }: { alert: AlertRow; userId: string }
         </div>
       </div>
 
-      {(preview || alert.photoUrl) && (
+      {(preview || alert.photoUrl || alert.reportPhotoUrl) && (
         // eslint-disable-next-line @next/next/no-img-element -- same call as Avatar: avoids next/image remote-pattern config
         <img
-          src={preview ?? alert.photoUrl!}
+          src={preview ?? alert.photoUrl ?? alert.reportPhotoUrl!}
           alt=""
           className="mt-3 max-h-48 w-full rounded-2xl border border-border object-cover"
         />
       )}
 
-      {awarded !== null ? (
-        <p className="mt-3 text-[13px] font-semibold text-primary">
-          Thanks — that&apos;s +{awarded} points on your next check of the wallet.
-        </p>
-      ) : alert.status !== "open" ? (
+      {alert.status === "reported" && !fixed && (
         <p className="mt-3 text-[13px] text-muted">
-          {alert.status === "fixed" ? "Fixed" : "Reported"}
-          {alert.resolvedByName ? ` by ${alert.resolvedByName}` : ""}.
+          Reported{alert.reportedByName ? ` by ${alert.reportedByName}` : ""} — still running.
         </p>
-      ) : (
+      )}
+      {fixed && !done && (
+        <p className="mt-3 text-[13px] text-muted">
+          Fixed{alert.resolvedByName ? ` by ${alert.resolvedByName}` : ""}.
+        </p>
+      )}
+
+      {done ? (
+        <p className="mt-3 text-[13px] font-semibold text-primary">
+          Thanks — that&apos;s +{done.points} points on your next check of the wallet.
+        </p>
+      ) : acted ? (
+        <p className="mt-3 text-[13px] text-muted">
+          {acted === "fixed"
+            ? "You fixed this one."
+            : "Your report is in — someone else can still switch it off."}
+        </p>
+      ) : !canAct ? null : (
         <>
           <input
             ref={fileRef}
@@ -147,21 +169,27 @@ export function AlertCard({ alert, userId }: { alert: AlertRow; userId: string }
             >
               {pending ? "Sending…" : `I turned it off · +${FIX_POINTS}`}
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              disabled={pending}
-              onClick={() => send("reported")}
-              className="w-full"
-            >
-              Can&apos;t fix it — report it · +
-              {file ? REPORT_PROVEN_POINTS : REPORT_BARE_POINTS}
-            </Button>
+            {/* Already reported by someone else: it is confirmed real, so the only thing
+                left worth paying for is switching it off. */}
+            {alert.status === "open" && (
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={pending}
+                onClick={() => send("reported")}
+                className="w-full"
+              >
+                Can&apos;t fix it — report it · +
+                {file ? REPORT_PROVEN_POINTS : REPORT_BARE_POINTS}
+              </Button>
+            )}
           </div>
           <p className="mt-2 text-[12.5px] leading-relaxed text-muted">
-            {file
-              ? `Proof attached — fixing it pays ${FIX_POINTS}, reporting it pays ${REPORT_PROVEN_POINTS}.`
-              : `A photo is what pays: ${FIX_POINTS} if you fixed it, ${REPORT_PROVEN_POINTS} if you only report it. A bare report is ${REPORT_BARE_POINTS}.`}
+            {alert.status === "reported"
+              ? `Someone confirmed this is real. Switch it off, snap the proof, take ${FIX_POINTS}.`
+              : file
+                ? `Proof attached — fixing it pays ${FIX_POINTS}, reporting it pays ${REPORT_PROVEN_POINTS}.`
+                : `A photo is what pays: ${FIX_POINTS} if you fixed it, ${REPORT_PROVEN_POINTS} if you only report it. A bare report is ${REPORT_BARE_POINTS}.`}
           </p>
         </>
       )}

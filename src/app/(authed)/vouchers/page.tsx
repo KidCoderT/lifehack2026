@@ -3,6 +3,7 @@ import { requireProfile } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { FadeIn } from "@/components/motion/fade-in";
+import { CountUp } from "@/components/fx/count-up";
 import {
   ClaimQuestButton,
   RedeemButton,
@@ -111,7 +112,7 @@ export default async function VouchersPage() {
         <Card className="flex flex-col gap-1">
           <p className={MICRO}>Fertilizer points</p>
           <p className="text-[42px] leading-none font-bold tracking-[-0.02em]">
-            {wallet.toLocaleString()}
+            <CountUp value={wallet} />
           </p>
           <p className="pt-1 text-[13px] text-muted">
             {earned.toLocaleString()} earned all time · {(earned - wallet).toLocaleString()} already
@@ -143,7 +144,10 @@ export default async function VouchersPage() {
                       short ? "" : "text-primary"
                     }`}
                   >
-                    {(short || given).toLocaleString()}
+                    {/* Keyed: crossing the goal swaps which quantity this is (short ->
+                        given); tweening 249 -> 5,000 would animate a number that changed
+                        identity. A key change remounts and paints the final value. */}
+                    <CountUp key={short ? "short" : "given"} value={short || given} />
                   </p>
                   <p className="pt-1 text-[13px] text-muted">
                     {short
@@ -153,7 +157,8 @@ export default async function VouchersPage() {
                 </div>
                 <ProgressBar value={given} max={g.goal_points} />
                 <p className="text-[13px] text-muted">
-                  {g.goal_title} — {given.toLocaleString()} / {g.goal_points.toLocaleString()} · you
+                  {g.goal_title} — <CountUp value={given} /> /{" "}
+                  {g.goal_points.toLocaleString()} · you
                   gave {(myGiving.get(g.id) ?? 0).toLocaleString()}
                 </p>
               </Card>

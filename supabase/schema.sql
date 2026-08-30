@@ -139,6 +139,15 @@ alter table public.events add column if not exists photo_url   text;
 alter table public.events add column if not exists resolved_by uuid
   references public.profiles on delete set null;
 
+-- Phase 4.5 revision: `reported` is intermediate, not terminal. A report says "this is real and
+-- still happening", so the reporter is recorded alongside — not instead of — whoever fixes it.
+-- ponytail: two columns instead of an event_actions table. Ceiling: only the FIRST reporter is
+-- kept, so a second person cannot report the same alert (they can still fix it). Upgrade path if
+-- many reporters ever matter: event_actions(event_id, user_id, action, photo_url).
+alter table public.events add column if not exists reported_by uuid
+  references public.profiles on delete set null;
+alter table public.events add column if not exists report_photo_url text;
+
 alter table public.group_memberships enable row level security;
 alter table public.readings          enable row level security;
 alter table public.ledger            enable row level security;
@@ -218,6 +227,7 @@ as $$
 declare
   v_group_id int;
   v_points   int;
+  v_uid      uuid := (select auth.uid());
 begin
   if p_action not in ('fixed', 'reported') then
     raise exception 'resolve_alert: bad action %', p_action;
@@ -231,16 +241,25 @@ begin
                 else 10
               end;
 
+  -- The claim stays inside the UPDATE, so two people tapping at once cannot both be paid.
+  -- `fixed` may now claim a reported row (reporting no longer closes an alert); `reported`
+  -- may only claim an untouched one. One action per person per alert: report or fix, never
+  -- both and never twice -- but someone else may still fix what you reported, and both
+  -- actors keep their points (the reporter's 50 is never clawed back).
   update public.events
-     set status      = p_action,
-         resolved_by = (select auth.uid()),
-         photo_url   = coalesce(p_photo_url, photo_url)
+     set status           = p_action,
+         resolved_by      = case when p_action = 'fixed'    then v_uid       else resolved_by end,
+         photo_url        = case when p_action = 'fixed'    then p_photo_url else photo_url end,
+         reported_by      = case when p_action = 'reported' then v_uid       else reported_by end,
+         report_photo_url = case when p_action = 'reported' then p_photo_url else report_photo_url end
    where id       = p_event_id
      and kind     = 'alert'
-     and status   = 'open'
+     and (status = 'open' or (p_action = 'fixed' and status = 'reported'))
+     and reported_by is distinct from v_uid
+     and resolved_by is distinct from v_uid
      and group_id in (
        select group_id from public.group_memberships
-        where user_id = (select auth.uid())
+        where user_id = v_uid
      )
   returning group_id into v_group_id;
 
@@ -249,7 +268,7 @@ begin
   end if;
 
   insert into public.ledger (user_id, group_id, kind, points)
-  values ((select auth.uid()), v_group_id, 'earn', v_points);
+  values (v_uid, v_group_id, 'earn', v_points);
 
   return v_points;
 end;

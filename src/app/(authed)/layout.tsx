@@ -7,15 +7,19 @@ import { BottomNav } from "@/components/nav/bottom-nav";
 export default async function AuthedLayout({ children }: { children: ReactNode }) {
   const { supabase, user, groups } = await requireProfile();
 
-  const { data: open, error } = await supabase
+  const { data: live, error } = await supabase
     .from("events")
-    .select("id, kind, to_user, group_id")
-    .eq("status", "open");
+    .select("id, kind, status, to_user, group_id")
+    .in("status", ["open", "reported"]);
   if (error) console.error("events query:", error);
 
+  // A `reported` alert is confirmed real and still broken, so it keeps nagging; only `fixed`
+  // silences one. Nudges have no middle state — open or acknowledged.
   const groupIds = new Set(groups.map((g) => g.id));
-  const unread = (open ?? []).filter(
-    (e) => (e.kind === "alert" && groupIds.has(e.group_id)) || e.to_user === user.id,
+  const unread = (live ?? []).filter((e) =>
+    e.kind === "alert"
+      ? groupIds.has(e.group_id)
+      : e.to_user === user.id && e.status === "open",
   ).length;
 
   return (

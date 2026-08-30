@@ -5,6 +5,7 @@ import { Sprout } from "lucide-react";
 import { contributePoints } from "@/app/(authed)/vouchers/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Moment } from "@/components/fx/moment";
 
 export type ContributeTarget = {
   id: number;
@@ -36,6 +37,9 @@ export function ContributeCard({
   const [given, setGiven] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [confirmMax, setConfirmMax] = useState(false);
+  // Fired from the action callback, never from render state: nothing records *when* a goal
+  // was crossed, so a later page load must not be able to re-fire it. Transient by design.
+  const [unlocked, setUnlocked] = useState<{ name: string; goal: string } | null>(null);
   const [pending, startTransition] = useTransition();
 
   const active = targets.find((t) => t.id === targetId) ?? targets[0];
@@ -54,10 +58,16 @@ export function ContributeCard({
     setError(null);
     setConfirmMax(false);
     setGiven((g) => g + amount);
+    // Read before the await: revalidatePath re-renders this card with shortfall 0, so
+    // checking after the action would never be true.
+    const { name, goalTitle, shortfall } = active;
+    const crosses = shortfall > 0 && amount >= shortfall;
     startTransition(async () => {
       const res = await contributePoints(active.id, amount);
-      if (res.ok) setGiven(0);
-      else {
+      if (res.ok) {
+        setGiven(0);
+        if (crosses) setUnlocked({ name, goal: goalTitle });
+      } else {
         setGiven((g) => g - amount);
         setError(res.error ?? "Those points didn't land. Try again.");
       }
@@ -136,6 +146,14 @@ export function ContributeCard({
             : " · goal already reached, extra points keep the tree growing")}
       </p>
       {error && <p className="mt-2 text-xs text-flag">{error}</p>}
+
+      <Moment open={!!unlocked} onClose={() => setUnlocked(null)}>
+        <p className="text-[11.5px] font-medium tracking-[0.11em] uppercase">Goal reached</p>
+        <p className="text-[26px] leading-tight font-bold tracking-[-0.02em]">{unlocked?.goal}</p>
+        <p className="pt-1 text-[13px]">
+          Unlocked for everyone in {unlocked?.name}. Nobody got it alone.
+        </p>
+      </Moment>
     </Card>
   );
 }

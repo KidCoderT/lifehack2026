@@ -8,6 +8,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Tree } from "@/components/tree";
 import { BarChart } from "@/components/charts/bar-chart";
 import { FadeIn } from "@/components/motion/fade-in";
+import { CountUp } from "@/components/fx/count-up";
 import { CtaLink } from "@/components/dashboard/cta-link";
 import { STAGE_NAMES, addDays, earnFor, latestDay, treeStage } from "@/lib/points";
 
@@ -164,7 +165,7 @@ export default async function Home() {
                 Fertilizer points
               </p>
               <p className="text-[42px] leading-none font-bold tracking-[-0.02em]">
-                {wallet.toLocaleString()}
+                <CountUp value={wallet} />
               </p>
             </div>
             <span className="shrink-0 rounded-full bg-surface-muted px-3 py-1.5 text-[11.5px] font-bold text-primary">

@@ -6,11 +6,15 @@ import { NudgeCard, type NudgeRow } from "@/components/alerts/nudge-card";
 
 type Status = "open" | "fixed" | "reported";
 
-/** Open first, then most recent — a resolved card should never push a live one down. */
-function openFirst<T extends { status: Status; createdAt: string }>(rows: T[]): T[] {
+/**
+ * Unsettled first, then most recent — a settled card should never push a live one down.
+ * `reported` counts as unsettled: it means confirmed real and still broken, so it sorts with
+ * `open`. Only `fixed` settles. (Nudges only ever hold open | fixed, so this key fits both.)
+ */
+function unsettledFirst<T extends { status: Status; createdAt: string }>(rows: T[]): T[] {
   return [...rows].sort(
     (a, b) =>
-      Number(b.status === "open") - Number(a.status === "open") ||
+      Number(b.status !== "fixed") - Number(a.status !== "fixed") ||
       b.createdAt.localeCompare(a.createdAt),
   );
 }
@@ -26,7 +30,9 @@ export default async function AlertsPage({
 
   const { data, error } = await supabase
     .from("events")
-    .select("id, kind, group_id, to_user, message, status, created_at, photo_url, resolved_by")
+    .select(
+      "id, kind, group_id, to_user, message, status, created_at, photo_url, resolved_by, reported_by, report_photo_url",
+    )
     .order("created_at", { ascending: false });
   if (error) console.error("alerts query:", error);
 
@@ -35,7 +41,24 @@ export default async function AlertsPage({
   const groupIds = new Set(groups.map((g) => g.id));
   const rows = data ?? [];
 
-  const alerts: AlertRow[] = openFirst(
+  // Credit lines name the reporter and the fixer — two different people on a
+  // reported-then-fixed alert. Separate query rather than an embedded resource: `events` has
+  // three FKs to `profiles`, so an embed needs a constraint-name hint.
+  const actorIds = [
+    ...new Set(
+      rows.flatMap((r) => [r.resolved_by, r.reported_by]).filter(Boolean) as string[],
+    ),
+  ];
+  const nameById = new Map<string, string>();
+  if (actorIds.length) {
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, username")
+      .in("id", actorIds);
+    for (const p of profs ?? []) nameById.set(p.id, p.username as string);
+  }
+
+  const alerts: AlertRow[] = unsettledFirst(
     rows
       .filter((r) => r.kind === "alert" && groupIds.has(r.group_id))
       .map((r) => ({
@@ -43,12 +66,21 @@ export default async function AlertsPage({
         message: r.message,
         status: r.status as Status,
         photoUrl: r.photo_url,
-        resolvedByName: null,
+        resolvedByName: r.resolved_by ? (nameById.get(r.resolved_by) ?? null) : null,
+        reportPhotoUrl: r.report_photo_url,
+        reportedByName: r.reported_by ? (nameById.get(r.reported_by) ?? null) : null,
+        // One action per person per alert — the buttons go away once you have used yours.
+        viewerAction:
+          r.resolved_by === user.id
+            ? ("fixed" as const)
+            : r.reported_by === user.id
+              ? ("reported" as const)
+              : null,
         createdAt: r.created_at,
       })),
   );
 
-  const nudges: NudgeRow[] = openFirst(
+  const nudges: NudgeRow[] = unsettledFirst(
     rows
       .filter((r) => r.kind === "nudge" && r.to_user === user.id)
       .map((r) => ({
@@ -59,25 +91,8 @@ export default async function AlertsPage({
       })),
   );
 
-  // Credit line on resolved cards. Separate query rather than an embedded resource:
-  // `events` has three FKs to `profiles`, so an embed needs a constraint-name hint.
-  const resolverIds = [
-    ...new Set(rows.map((r) => r.resolved_by).filter(Boolean) as string[]),
-  ];
-  if (resolverIds.length) {
-    const { data: profs } = await supabase
-      .from("profiles")
-      .select("id, username")
-      .in("id", resolverIds);
-    const byId = new Map((profs ?? []).map((p) => [p.id, p.username as string]));
-    const resolverOf = new Map(rows.map((r) => [r.id, r.resolved_by]));
-    for (const a of alerts) {
-      const rid = resolverOf.get(a.id);
-      a.resolvedByName = rid ? (byId.get(rid) ?? null) : null;
-    }
-  }
-
-  const openAlerts = alerts.filter((a) => a.status === "open").length;
+  // Matches the header bell: a reported alert is still live, so it stays in the count.
+  const openAlerts = alerts.filter((a) => a.status !== "fixed").length;
   const openNudges = nudges.filter((n) => n.status === "open").length;
   const shown = showNudges ? nudges : alerts;
 

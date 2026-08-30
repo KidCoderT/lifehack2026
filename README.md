@@ -30,12 +30,12 @@ Copy the example and fill in your Supabase credentials:
 cp .env.local.example .env.local
 ```
 
-| Variable | Where to find it | Used by |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Project Settings → Data API | Browser + server |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Project Settings → API Keys | Browser + server |
-| `SUPABASE_SECRET_KEY` | Project Settings → API Keys (secret) | `bun run seed` only — **never** prefix with `NEXT_PUBLIC_` |
-| `SUPABASE_DB_URL` | Settings → Database → Connection string → **Session pooler** | `bun run db:push` only |
+| Variable                               | Where to find it                                             | Used by                                                    |
+| -------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Project Settings → Data API                                  | Browser + server                                           |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Project Settings → API Keys                                  | Browser + server                                           |
+| `SUPABASE_SECRET_KEY`                  | Project Settings → API Keys (secret)                         | `bun run seed` only — **never** prefix with `NEXT_PUBLIC_` |
+| `SUPABASE_DB_URL`                      | Settings → Database → Connection string → **Session pooler** | `bun run db:push` only                                     |
 
 > **Use port `6543`, not `5432`, in `SUPABASE_DB_URL`.** Port 5432 is blocked on many campus and
 > office networks — including NUS wifi, which is where we found out. Percent-encode any special
@@ -51,7 +51,7 @@ Creates all 8 tables, every Row Level Security policy, the storage bucket, the `
 Postgres function, and the starter voucher catalogue. The file is **idempotent** — re-running it is
 safe, and you must re-run it before any fresh seed.
 
-*(No `SUPABASE_DB_URL`? Paste `supabase/schema.sql` into the Supabase SQL editor instead.)*
+_(No `SUPABASE_DB_URL`? Paste `supabase/schema.sql` into the Supabase SQL editor instead.)_
 
 ### 4. Seed demo data
 
@@ -77,12 +77,12 @@ browser's device toolbar, or open it on your phone.
 Every seeded account shares the password **`12345678`**. Start with the first one — it's the only
 account that belongs to two communities, so it's the one that shows the multi-group experience.
 
-| Email | Username | Communities |
-|---|---|---|
+| Email                   | Username    | Communities              |
+| ----------------------- | ----------- | ------------------------ |
 | `tejas.sunil@u.nus.edu` | tejasbuilds | 💻 SOC + 🏛️ Raffles Hall |
-| `sairathomas@u.nus.edu` | Ecofriend | 💻 SOC + 🏛️ Raffles Hall |
-| `ziern_teh@u.nus.edu` | ziern_teh | 💻 SOC + 🎓 NUSC |
-| `vayuntandon@u.nus.edu` | vayun | 💻 SOC |
+| `sairathomas@u.nus.edu` | Ecofriend   | 💻 SOC + 🏛️ Raffles Hall |
+| `ziern_teh@u.nus.edu`   | ziern_teh   | 💻 SOC + 🎓 NUSC         |
+| `vayuntandon@u.nus.edu` | vayun       | 💻 SOC                   |
 
 Another 18 seeded residents fill out the gardens and the leaderboard — `alice.tan@u.nus.edu`,
 `ben.lim@u.nus.edu`, `chloe.ng@u.nus.edu`, `daniel.koh@u.nus.edu`, `elena.wu@u.nus.edu`,
@@ -101,7 +101,7 @@ nudge.
 missing feature.**
 
 An Evergreen account only means something once it is bound to a physical EcoVolt meter. Your points
-come from *your* consumption measured against *your* enrolment baseline, and your community is the
+come from _your_ consumption measured against _your_ enrolment baseline, and your community is the
 floor or college you actually live in. A self-registered account has none of that: no meter, no
 baseline, no location, nothing to measure and nothing to be jointly responsible for. It could not
 earn a single point, and dropping it into a hall's garden would put a stranger's tree on a plot next
@@ -111,23 +111,23 @@ So the flow runs the other way round. A facility manager commissions the meters,
 accounts against institutional email addresses (`@u.nus.edu`), and assigns each one to the
 location it belongs to. The app deliberately has **no `insert` grant on `profiles` and no
 auto-provision trigger** — a login with no organization-created profile is rejected with
-*"No profile row for this account"* rather than being quietly handed an empty dashboard.
+_"No profile row for this account"_ rather than being quietly handed an empty dashboard.
 
 What the user controls is their **public identity**, not their data source: on first login they pick
 a username and upload an avatar. Group membership is never user-selected.
 
-*(In this prototype the "organization" is `scripts/seed.ts` — it creates the accounts, assigns the
-communities, and generates the meter readings that a real EcoVolt deployment would stream in.)*
+_(In this prototype the "organization" is `scripts/seed.ts` — it creates the accounts, assigns the
+communities, and generates the meter readings that a real EcoVolt deployment would stream in.)_
 
 ### Scripts
 
-| Command | What it does |
-|---|---|
-| `bun run dev` | Development server |
-| `bun run build` | Production build |
-| `bun run lint` | ESLint |
+| Command           | What it does                                |
+| ----------------- | ------------------------------------------- |
+| `bun run dev`     | Development server                          |
+| `bun run build`   | Production build                            |
+| `bun run lint`    | ESLint                                      |
 | `bun run db:push` | Apply `supabase/schema.sql` to your project |
-| `bun run seed` | Wipe and rebuild all generated data |
+| `bun run seed`    | Wipe and rebuild all generated data         |
 
 ---
 
@@ -138,8 +138,7 @@ burn all night, someone's aircon runs against an open window, and **nobody feels
 because nobody can see it. The electricity bill is one number, once a month, addressed to the
 institution. Awareness posters ask you to care about a quantity you have never been shown.
 
-Meanwhile EcoVolt meters are already measuring all of it, per room, every day. The data exists. What
-doesn't exist is a reason to look at it.
+Meanwhile EcoVolt meters are already measuring all of it, per room, every day. The data exists (Maybe not in NUS right now but its there in others). What doesn't exist is a reason to look at it.
 
 So we stopped designing a dashboard and started designing a **garden**. You don't check your energy
 usage; you check on your tree — and everyone in your hall can see whether it's growing.
@@ -153,18 +152,18 @@ so everyone benefits.
 
 **The pages:**
 
-| Screen | What's there |
-|---|---|
-| **Home** `/` | Your wallet balance, a mini-tree for every community you're in, a 7-day energy chart against your baseline, monthly impact (kWh, litres, CO₂), and the global leaderboard with your rank |
+| Screen                    | What's there                                                                                                                                                                                                                                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Home** `/`              | Your wallet balance, a mini-tree for every community you're in, a 7-day energy chart against your baseline, monthly impact (kWh, litres, CO₂), and the global leaderboard with your rank                                                                                                                                                   |
 | **Garden** `/garden/[id]` | An **isometric 5×5 plot** — not a grid of boxes — where every member's tree stands at its true growth stage, so height alone shows who's contributing. Search a username to find their plot, tap any plot to inspect that member, and send a leaf nudge to anyone who didn't save yesterday. Members over their usual usage light up amber |
-| **Energy** `/energy` | Your EcoVolt meter: 14 days of electricity and water against the frozen baseline, a day-by-day breakdown of exactly how each percent became points, and the conversion explained |
-| **Rewards** `/vouchers` | Redeem personal treats (bubble tea, GrabFood, Kopitiam) for an 8-character code, or contribute points to your community's quest. Cross the group goal and the reward unlocks **for every member** |
-| **Alerts** 🔔 | Community waste reports and peer nudges. Resolving an alert pays out on an **evidence-first ladder**: a photo proving you turned it off earns 100, a photo proving it's still broken earns 50, a bare report earns 10 |
-| **Profile** `/profile` | Avatar, username, your communities, sign out |
+| **Energy** `/energy`      | Your EcoVolt meter: 14 days of electricity and water against the frozen baseline, a day-by-day breakdown of exactly how each percent became points, and the conversion explained                                                                                                                                                           |
+| **Rewards** `/vouchers`   | Redeem personal treats (bubble tea, GrabFood, Kopitiam) for an 8-character code, or contribute points to your community's quest. Cross the group goal and the reward unlocks **for every member**                                                                                                                                          |
+| **Alerts** 🔔             | Community waste reports and peer nudges. Resolving an alert pays out on an **evidence-first ladder**: a photo proving you turned it off earns 100, a photo proving it's still broken earns 50, a bare report earns 10                                                                                                                      |
+| **Profile** `/profile`    | Avatar, username, your communities, sign out                                                                                                                                                                                                                                                                                               |
 
 Three design decisions do most of the work:
 
-- **Your tree grows from what you *give*, not what you earn.** Hoarding points grows nothing. The
+- **Your tree grows from what you _give_, not what you earn.** Hoarding points grows nothing. The
   garden is the scoreboard, and it's communal.
 - **Group rewards are a threshold, not a purchase.** Contributed points are never consumed by an
   unlock — they stay as tree growth forever, which is why the garden never shrinks.
@@ -193,7 +192,7 @@ Bun. **Seven runtime dependencies total** — no chart library, no game engine, 
 - **"Field Notes" design system.** One monospace face, 14 colour tokens, flat fills, no gradients or
   shadows anywhere. Every tree, tile and chart is hand-drawn SVG or CSS.
 - **Deterministic seeding.** A mulberry32 PRNG means the demo data is byte-identical on every run,
-  and the seed script *asserts* the demo is actually winnable before we walk on stage.
+  and the seed script _asserts_ the demo is actually winnable before we walk on stage.
 
 ## Challenges we ran into
 
@@ -204,7 +203,7 @@ Bun. **Seven runtime dependencies total** — no chart library, no game engine, 
 - **The animation library silently rewrote our CSS.** Trees on the left and right of the isometric
   plot slid sideways when selected, while the middle column looked fine. `motion` forces
   `transform-box: fill-box` on SVG elements when you animate a transform, so our absolute
-  `transform-origin` coordinates were being measured from *each tree's own bounding box* — an error
+  `transform-origin` coordinates were being measured from _each tree's own bounding box_ — an error
   proportional to distance from centre. Percentage origins fixed it.
 - **Our chart was 1.88× too big on a phone.** The bar chart was an SVG with a `168×105` viewBox
   stretched by `w-full` to ~316px, scaling everything inside it — including `fontSize={8}`, which
