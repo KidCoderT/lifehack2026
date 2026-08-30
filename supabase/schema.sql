@@ -50,8 +50,17 @@ create policy "avatar write" on storage.objects for all to authenticated
   using  (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text)
   with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
 
+-- Renamed to the real NUS communities the team belongs to. These updates run BEFORE the
+-- insert so an already-seeded project is migrated in place — the ids are preserved, which
+-- matters: ledger, readings and memberships all key off group_id, and /garden redirects to
+-- a user's LOWEST group id, so SOC must stay id 1 or the first garden a judge opens is a
+-- near-empty plot. No-ops once applied, and no-ops on a fresh database.
+update public.groups set name = 'SOC',          emoji = '💻' where name = 'Solar Squad';
+update public.groups set name = 'Raffles Hall', emoji = '🏛️' where name = 'Compost Crew';
+update public.groups set name = 'NUSC',         emoji = '🎓' where name = 'Tide Turners';
+
 insert into public.groups (name, emoji) values
-  ('Solar Squad', '☀️'), ('Compost Crew', '🍃'), ('Tide Turners', '🌊')
+  ('SOC', '💻'), ('Raffles Hall', '🏛️'), ('NUSC', '🎓')
 on conflict (name) do nothing;
 
 -- ============================ Evergreen ============================
@@ -251,11 +260,11 @@ grant  execute on function public.resolve_alert(bigint, text, text) to authentic
 
 -- Goals per group (only overwrites the untouched default).
 update public.groups set goal_title = 'Universal Studios group discount', goal_points = 5000
-  where name = 'Solar Squad' and goal_title = 'Community reward';
+  where name = 'SOC' and goal_title = 'Community reward';
 update public.groups set goal_title = 'Escape room night', goal_points = 4000
-  where name = 'Compost Crew' and goal_title = 'Community reward';
+  where name = 'Raffles Hall' and goal_title = 'Community reward';
 update public.groups set goal_title = 'Sentosa beach day fund', goal_points = 6000
-  where name = 'Tide Turners' and goal_title = 'Community reward';
+  where name = 'NUSC' and goal_title = 'Community reward';
 
 -- Voucher catalog. Group vouchers join by group name to dodge serial-id drift.
 insert into public.vouchers (title, description, emoji, cost, scope, group_id)
@@ -266,9 +275,9 @@ from (values
   ('$10 Kopitiam credit',       'All campus stalls',                '☕', 550, 'personal', null),
   ('Movie ticket',              'GV, any 2D screening',             '🎬', 800, 'personal', null),
   ('Reusable cup + 20% off',    'Campus cafe partner',              '🥤', 150, 'personal', null),
-  ('Universal Studios 30% off', 'Unlocked by the community goal',   '🎢',   0, 'group', 'Solar Squad'),
-  ('Escape room for the crew',  'Unlocked by the community goal',   '🔐',   0, 'group', 'Compost Crew'),
-  ('Beach day BBQ pit',         'Unlocked by the community goal',   '🏖️',  0, 'group', 'Tide Turners')
+  ('Universal Studios 30% off', 'Unlocked by the community goal',   '🎢',   0, 'group', 'SOC'),
+  ('Escape room for the crew',  'Unlocked by the community goal',   '🔐',   0, 'group', 'Raffles Hall'),
+  ('Beach day BBQ pit',         'Unlocked by the community goal',   '🏖️',  0, 'group', 'NUSC')
 ) as v(title, description, emoji, cost, scope, group_name)
 left join public.groups g on g.name = v.group_name
 on conflict (title) do nothing;

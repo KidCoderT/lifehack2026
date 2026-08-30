@@ -192,8 +192,8 @@ Never invent these — they come from `src/lib/points.ts` and `scripts/seed.ts`.
 - `STAGES = [0, 50, 150, 400, 800, 1500]`
 - Stage names: Seed · Sprout · Sapling · Young Tree · Mature Tree · Blossoming
 - `earnFor()`: **1% under baseline = 10 points**
-- Groups: Solar Squad ☀️ goal 5000 (Universal Studios group discount) · Compost Crew 🍃 goal
-  4000 (escape room night) · Tide Turners 🌊 goal 6000 (Sentosa beach day fund)
+- Groups: SOC 💻 goal 5000 (Universal Studios group discount) · Raffles Hall 🍃 goal
+  4000 (escape room night) · NUSC 🌊 goal 6000 (Sentosa beach day fund)
 - Wallet = `sum(earn) − sum(contribute) − sum(redeem)`; leaderboard = `sum(earn)`;
   a group's tree and goal bar = `sum(contribute)` for that group
 

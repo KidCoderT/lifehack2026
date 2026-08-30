@@ -32,7 +32,7 @@ Instead of abstract kWh graphs and passive awareness posters, Evergreen transfor
 Evergreen integrates with **EcoVolt** ([https://www.ecovolt.ai/](https://www.ecovolt.ai/)) smart energy and water meters deployed across physical rooms and facilities.
 
 ### Organization & Email Allocation
-- Facility managers / organization administrators configure physical locations (e.g., "Solar Squad" = Sheares Hall Block A Level 3).
+- Facility managers / organization administrators configure physical locations (e.g., "SOC" = Sheares Hall Block A Level 3).
 - Users are pre-assigned to groups based on their institutional email addresses (`@u.nus.edu`, `@office.com`, `@poly.edu.sg`).
 - An individual can belong to multiple groups (e.g., their Residential Floor + their Academic Project Lab).
 
@@ -113,7 +113,7 @@ narrative, but **they earn zero points in v1** — `earnFor()` in `src/lib/point
 baseline/actual and nothing else. This is a scope decision, not an oversight: a second currency needs
 its own baseline integrity story and doubles the balancing work. Water is **display-only in v1**; the
 natural v2 is a separate water multiplier feeding the same ledger. Say this out loud if asked —
-"Tide Turners" is a group name, not a second economy.
+"NUSC" is a group name, not a second economy.
 
 **Why alert resolution is not a second currency either.** A common-room light is not on the
 resolver's personal meter, so the saving it represents is one `earnFor()` would otherwise never see.
@@ -258,7 +258,7 @@ the database becomes the only enforcement point.
   99 / 90 / 50%, or exact points). This is the control that **arms the unlock celebration** — park a
   group a few points short to rehearse the payoff, or drop it back to show the bar climb. The ledger
   is append-only, so a boost can only move a group **forward**; only a re-seed walks it back.
-- **Pitch-state status panel**: a read-only readout at the top of `/demo` — Solar Squad total and
+- **Pitch-state status panel**: a read-only readout at the top of `/demo` — SOC total and
   gap, demo wallet, open + reported alert counts, latest reading date, group vouchers already
   claimed. Every rehearsal permanently consumes state (the unlock beat, alert resolutions,
   redemptions), and this is the only thing that tells you so **before** you are on stage rather
@@ -316,9 +316,9 @@ So only `demoResetSeed()` is still on the table, and the 3-minute runbook in §8
 > current seed configuration.
 
 1. **0:00 - 0:30 (The Hook & Login)**: Log in as `tejas.sunil@u.nus.edu`. Show the Dashboard: explain that university residences waste massive energy because students don't see their impact. Introduce Evergreen: conservation as a shared garden.
-2. **0:30 - 1:15 (Community Garden & 5×5 Grid)**: Open "Solar Squad" garden (20 seeded members, so the grid reads full). Show the 5×5 plot where everyone's tree grows with their contributions. Search for peer `alice.tan`, inspect her tree, and send a leaf nudge because she didn't save yesterday. *(`alice.tan` is a seeded low-earner and a Solar Squad member — verify both with the seed summary. `chloe.ng`, `ben.lim`, and `daniel.koh` are the other seeded nudge targets if a backup is needed.)*
+2. **0:30 - 1:15 (Community Garden & 5×5 Grid)**: Open "SOC" garden (22 seeded members, so the grid reads full — 3 bare tiles of 25). Show the 5×5 plot where everyone's tree grows with their contributions. Search for peer `alice.tan`, inspect her tree, and send a leaf nudge because she didn't save yesterday. *(`alice.tan` is a seeded low-earner and a SOC member — verify both with the seed summary. `chloe.ng`, `ben.lim`, and `daniel.koh` are the other seeded nudge targets if a backup is needed.)*
 3. **1:15 - 1:50 (EcoVolt Tracker & Points Engine)**: Navigate to `/energy`. Show real EcoVolt telemetry against baseline. Explain the $1\% = 10\text{ pts}$ formula.
-4. **1:50 - 2:30 (The Unlock Moment)**: Open `/vouchers`. Show that Solar Squad is at **~4,750 / 5,000** pts for Universal Studios tickets. Contribute the **~250 pt** gap from wallet $\rightarrow$ live animation triggers unlocking the group reward for all members. *(Demo user's wallet is ~1,280 pts, comfortably above the gap.)*
+4. **1:50 - 2:30 (The Unlock Moment)**: Open `/vouchers`. Show that SOC is at **~4,750 / 5,000** pts for Universal Studios tickets. Contribute the **~250 pt** gap from wallet $\rightarrow$ live animation triggers unlocking the group reward for all members. *(Demo user's wallet is ~1,280 pts, comfortably above the gap.)*
 5. **2:30 - 3:00 (Live Anomaly, Proof, & Time Advance)**: On the secondary screen open `/demo` and
    raise a waste alert **against the group already on screen**, naming a real location in the room
    you are standing in. **Then tap the header bell on the main screen** to load it — there is no
@@ -351,7 +351,7 @@ So only `demoResetSeed()` is still on the table, and the 3-minute runbook in §8
      explicitly the CLI sent the file as a single prepared statement, which Postgres rejects for
      multi-statement DDL.*
 2. `bun run seed`. Confirm the `Pitch unlock beat:` line prints `YES`.
-3. Copy the printed Solar Squad total and gap into step 4 above.
+3. Copy the printed SOC total and gap into step 4 above.
 4. Confirm the deployed URL is live on both the phone (main screen) and laptop (`/demo`), and that
    **`SUPABASE_SECRET_KEY` is set in the Vercel environment** — every `/demo` action reads it
    through `createAdminClient()`, and without it the whole rig fails on stage while working locally.

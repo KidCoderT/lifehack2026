@@ -8,8 +8,8 @@
  * tokens: surface-muted, surface, plot, plot-edge, foreground, primary, bark, canopy,
  * canopy-deep. No plot-hot, no flag, no hex, no gradients, no opacity.
  *
- * Each scene depicts the REWARD (groups.goal_title), not the group's emoji — Solar
- * Squad gets a rollercoaster, not a sun.
+ * Each scene depicts the REWARD (groups.goal_title), not the group's emoji — SOC
+ * gets a rollercoaster, not a laptop.
  *
  * To swap in real artwork: drop a square PNG (>=160px) in public/goal-art/ and add the
  * group name to PNG below. Plain <img>, never next/image — same call as ui/Avatar, so
@@ -17,15 +17,15 @@
  */
 
 const PNG: Record<string, string> = {
-  // "Solar Squad": "/goal-art/solar-squad.png",
+  // "SOC": "/goal-art/soc.png",
 };
 
 // Keyed by groups.name, not groups.id: schema.sql joins group vouchers by name
 // "to dodge serial-id drift", so the serial is not stable across a reseed.
 const SCENES: Record<string, () => React.ReactElement> = {
-  "Solar Squad": Coaster,
-  "Compost Crew": Padlock,
-  "Tide Turners": Wave,
+  "SOC": Coaster,
+  "Raffles Hall": Padlock,
+  "NUSC": Wave,
 };
 
 /**
@@ -70,7 +70,7 @@ function Coaster() {
   );
 }
 
-/** Escape room night. */
+/** Raffles Hall — escape room night. */
 function Padlock() {
   return (
     <>
@@ -88,7 +88,7 @@ function Padlock() {
   );
 }
 
-/** Sentosa beach day. A wave, not a palm — the plot already has 20 trees, a 21st vanishes.
+/** NUSC — Sentosa beach day. A wave, not a palm — the plot already has 20 trees, a 21st vanishes.
     There is no blue in the palette, so the sea is canopy/canopy-deep. */
 function Wave() {
   return (

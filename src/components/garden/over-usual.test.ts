@@ -2,7 +2,7 @@
 import { strict as assert } from "node:assert";
 import { overPercent, overSentence, overPill, overAria } from "./over-usual";
 
-// Genuinely over baseline — the four seeded Solar Squad members on 2026-08-28.
+// Genuinely over baseline — the four seeded SOC members on 2026-08-28.
 assert.equal(overPercent(4.9), 5);
 assert.equal(overPercent(1.1), 1);
 assert.equal(overSentence(5.9, false), "Using 6% more power than usual today.");

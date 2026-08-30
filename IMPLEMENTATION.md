@@ -20,7 +20,7 @@ This is the product's baseline loop — every phase builds on top of it and must
 3. **Dashboard Command Center.** `src/app/(authed)/page.tsx` renders user wallet balance ($\sum \text{earn} - \sum \text{contribute} - \sum \text{redeem}$), multi-group mini-trees for every assigned community, 7-day energy savings trend SVG chart, monthly contribution stats, and global leaderboard with personal rank highlighted.
 4. **Community Garden 5×5 Matrix.** `/garden/[groupId]` displays the community quest progress bar, a 5×5 interactive grid with each member's tree rendered at their exact growth stage ($0 - 5$), username search to highlight specific plots, a tree inspector card showing member stats, and a one-tap leaf nudge button for peers with zero savings yesterday.
 5. **EcoVolt Energy & Water Tracker.** `/energy` displays 14-day energy consumption vs the frozen per-user baseline, calculates percentage savings ($1\% = 10\text{ pts}$), breaks down daily point conversion, and displays water conservation telemetry.
-6. **Rewards & Communal Quests.** `/vouchers` enables redeeming personal vouchers (mints an 8-character code and deducts points from wallet) and contributing points to an assigned community. Once group contributions reach the goal threshold (e.g. 5,000 pts for Solar Squad), the group voucher (e.g. Universal Studios passes) unlocks for all members.
+6. **Rewards & Communal Quests.** `/vouchers` enables redeeming personal vouchers (mints an 8-character code and deducts points from wallet) and contributing points to an assigned community. Once group contributions reach the goal threshold (e.g. 5,000 pts for SOC), the group voucher (e.g. Universal Studios passes) unlocks for all members.
 7. **Social Alerts & Accountability.** `/alerts` displays community energy waste notices (e.g. "Lights left on in Common Room") with "Mark Fixed" and "Report" actions, along with peer leaf nudges. Unread count appears as a badge on the header bell icon.
 8. **Demo Rig Time-Travel.** `/demo` (hidden control room) allows advancing time by 1 day (generating EcoVolt readings and awarding points), triggering waste alerts, and simulating peer slacking for live pitch demonstration.
 
@@ -73,7 +73,7 @@ Goal: Running Next.js 16 app with Supabase auth, seeded database, light-theme de
 - [x] `src/lib/supabase/client.ts` & `src/lib/supabase/server.ts` — SSR Supabase client wrappers with cookie persistence and `requireProfile()` auth gate.
 - [x] `src/lib/supabase/admin.ts` — Service-role admin client for seeding and background tasks.
 - [x] `src/proxy.ts` — Next 16's middleware equivalent (the `middleware.ts` rename). Refreshes the Supabase session cookie on every request and redirects anonymous traffic to `/login`. **Load-bearing for the entire auth story** — `requireProfile()` alone does not cover it.
-- [x] `scripts/seed.ts` — Mulberry32 deterministic PRNG seeding 22 users (including `tejas.sunil@u.nus.edu`), 3 groups (Solar Squad, Compost Crew, Tide Turners), 21 days of EcoVolt energy/water readings, ledger earn/contribution transactions, and sample alerts. Demo-stage tuning lives in the constants at the top (`DEMO_GROUP_SIZE`, `DEMO_GROUP_FILL`, `DEMO_WALLET_RESERVE`); the printed summary reports the pitch's unlock gap and asserts the demo wallet covers it.
+- [x] `scripts/seed.ts` — Mulberry32 deterministic PRNG seeding 22 users (including `tejas.sunil@u.nus.edu`), 3 groups (SOC, Raffles Hall, NUSC), 21 days of EcoVolt energy/water readings, ledger earn/contribution transactions, and sample alerts. Demo-stage tuning lives in the constants at the top (`DEMO_GROUP_FILL`, `DEMO_WALLET_RESERVE`); the printed summary reports the pitch's unlock gap and asserts the demo wallet covers it.
 - [x] `src/lib/points.ts` — Core points math: `earnFor(baseline, actual)` ($1\% = 10\text{ pts}$), `treeStage(contributed)` (0–5), `STAGES` $[0, 50, 150, 400, 800, 1500]$, and date helpers.
 - [x] **Apply `supabase/schema.sql` to the live Supabase project.** Applied 2026-08-29. The file is idempotent, so re-running is safe. **This must happen before every fresh seed.** Two ways to run it:
   - `bun run db:push` — needs `SUPABASE_DB_URL` in `.env.local` (see `.env.local.example`). Point it at the **pooler on port 6543**; port 5432 is firewalled on the NUS network, which is also why `supabase db query --linked` hangs at `Initialising login role...`.
@@ -93,8 +93,25 @@ Goal: Running Next.js 16 app with Supabase auth, seeded database, light-theme de
 **Done when:** `supabase/schema.sql` has been applied to the live project; `bun run seed` populates Supabase and prints `Pitch unlock beat: … YES`; logging in with `tejas.sunil@u.nus.edu` / `12345678` navigates through onboarding to a rendered dashboard at `/`.
 
 **Status: complete (2026-08-29).** Both blockers cleared:
-- Schema applied; `bun run seed` prints `Pitch unlock beat: contribute 249 pts to Solar Squad -- wallet covers it: YES`.
-  Demo user: earned 2330, wallet 1282. Solar Squad 4751/5000 (20 members), Compost Crew 2026/4000, Tide Turners 3807/6000.
+- Schema applied; `bun run seed` prints `Pitch unlock beat: contribute 249 pts to SOC -- wallet covers it: YES`.
+  Demo user: earned 2330, wallet 1282. SOC 4751/5000 (20 members), Raffles Hall 2026/4000, NUSC 3807/6000.
+
+> **Groups renamed and re-rostered 2026-08-30.** Solar Squad / Compost Crew / Tide Turners became
+> **SOC 💻 / Raffles Hall 🏛️ / NUSC 🎓**, renamed in place so `groups.id` is unchanged — `ledger`,
+> `readings`, `group_memberships` and `vouchers.group_id` all key off it, and `/garden` redirects to
+> a user's *lowest* group id, so **SOC had to stay id 1** or the first garden a judge opens would be
+> a sparse plot. Memberships are no longer round-robin: **SOC is school-wide (all 22)**, Raffles Hall
+> is `tejas` + `saira` + 10 fakes (12), NUSC is `ziern_teh` + 8 fakes (9).
+> - `scripts/seed.ts` now **wipes `group_memberships`** before rebuilding. It is a composite PK with
+>   no `id`, so it was never covered by the generated-data wipe; without this the old round-robin
+>   rows survive and pollute the explicit roster.
+> - Group names are a join key in three places — `schema.sql`'s voucher insert and `goal_title`
+>   updates, and `garden/goal-art.tsx`'s `SCENES` map. All three were updated; miss one and group
+>   vouchers get `group_id = null` or every goal falls back to the generic gift box.
+> - `ziern_th@u.nus.edu` was corrected to `ziern_teh@u.nus.edu`. The old account still exists but is
+>   **inert** — no memberships, no ledger rows. Delete the auth user if you want it gone.
+> - Re-verified after reseed: SOC 4751/5000 gap 249, wallet 1282, `Pitch unlock beat: … YES`.
+>   The seeded numbers are unchanged; only names and rosters moved.
 - `src/app/(authed)/page.tsx` now exists so the post-login `router.replace("/")` lands. It is a
   **placeholder**: wallet card + one mini-tree per community only. The 7-day chart, monthly stat
   cards and leaderboard are still Phase 1's checklist below, unticked.
@@ -140,7 +157,7 @@ confirm the same three numbers on the deployed URL.
 **Status: built and verified locally (2026-08-29); Vercel deploy still outstanding.**
 Verified by rendering `/` through the dev server with a real `@supabase/ssr` cookie (same RLS path
 as production), then diffing against an independent query script: wallet **1,282**, +760 earned this
-week, Solar Squad 4,751/5,000, Compost Crew 2,026/4,000, rank **#1 of 19**, streak 21d.
+week, SOC 4,751/5,000, Raffles Hall 2,026/4,000, rank **#1 of 19**, streak 21d.
 
 Two open decisions, both deliberate deviations rather than bugs:
 - **Mini-tree stage is the user's own giving, not the group total** — contradicts this section's
@@ -182,7 +199,7 @@ Goal: Interactive communal garden showing all group members' trees on a 5×5 plo
     contradicts DESIGN.md's locked plot rule ("Height is the ranking… No numbers, no leaderboard
     row, no legend").** Username, stage name and points-given live in the inspector and in each
     plot's `aria-label` instead. If you want the labels back, change DESIGN.md first.
-  - Empty plots rendered as bare tiles, no tree. `tap a plot` is the inspector affordance. The demo group seeds 20 members (`DEMO_GROUP_SIZE`), so expect 5 bare tiles, not 17.
+  - Empty plots rendered as bare tiles, no tree. `tap a plot` is the inspector affordance. SOC is school-wide (22 members), so expect 3 bare tiles, not 17.
   - **Groups may exceed 25 members** — nothing in the schema caps them. Render the first 25 by the sort order above and show a "+N more" affordance rather than overflowing the grid.
 - [x] Live Member Search: Instant filter input to find a member by username and highlight/zoom to their tree.
 - [x] Tree Inspector Drawer / Modal: Clicking any tree opens member card with avatar, username, stage name, points contributed, and "Send Leaf Nudge" button.
@@ -192,7 +209,7 @@ Goal: Interactive communal garden showing all group members' trees on a 5×5 plo
 
 **Status: built and verified (2026-08-29), including in a real browser.**
 - `/garden` → 307 → `/garden/1` (lowest group id). `/garden/3` (not a member) → 404.
-- Solar Squad renders 25 tiles / 20 trees / **5 bare plots**, 4 tiles `plot-hot` with a matching
+- SOC renders 25 tiles / 20 trees / **5 bare plots**, 4 tiles `plot-hot` with a matching
   `4 leaking` header count, goal `4,751 / 5,000`, `249 points short`.
 - **Tap → inspector confirmed in Chrome**: selecting grace.ho's plot moved the selection ring and
   swapped the inspector to `Young Tree · 494 pts given`. **Search confirmed**: typing `liang.zw`
@@ -346,10 +363,10 @@ Goal: Full voucher redemption system for individual rewards and communal point c
 
 **Status: built and verified against live Supabase (2026-08-30).** All three actions were executed
 for real, then `bun run seed` restored the pitch state (`Pitch unlock beat: … YES`, wallet 1282,
-Solar Squad 4751/5000, gap 249). The seed clears `redemptions`, so no test vouchers survive.
+SOC 4751/5000, gap 249). The seed clears `redemptions`, so no test vouchers survive.
 
 Verified run: redeem "Free bubble tea" → wallet 1282 → 1082, one `redemptions` row with an 8-char
-code, one `ledger` redeem row. Contribute 249 to Solar Squad → wallet 1082 → 833, `ledger` row
+code, one `ledger` redeem row. Contribute 249 to SOC → wallet 1082 → 833, `ledger` row
 `contribute/249/group_id 1`, bar 5,000/5,000. Claim Universal Studios → one `redemptions` row and
 **no ledger row**, group total unchanged at 5,000. Final DB delta: `ledger` 27 → 29 (exactly the two
 expected rows), `redemptions` 0 → 2. Console clean on both pages.
@@ -521,7 +538,7 @@ Goal: Hidden control room (`/demo`) for flawless live hackathon presentation and
 - [ ] **Pitch-state status panel, at the top of `/demo`.** Not in the original spec; added because
       nothing else tells you the rehearsal left state dirty until you are already on stage. One
       read-only readout, refreshed on every action:
-      Solar Squad total **and gap** · demo user's wallet · open + reported alert counts ·
+      SOC total **and gap** · demo user's wallet · open + reported alert counts ·
       latest reading date · whether each group voucher is already claimed.
       This is what replaces a working `demoResetSeed` button: it tells you *when* to go run
       `bun run seed` in a terminal, which is the part you would otherwise get wrong.

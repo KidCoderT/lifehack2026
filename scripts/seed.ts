@@ -13,7 +13,7 @@ const DEMO_EMAIL = "tejas.sunil@u.nus.edu";
 const REAL_EMAILS = [
   DEMO_EMAIL,
   "sairathomas@u.nus.edu",
-  "ziern_th@u.nus.edu",
+  "ziern_teh@u.nus.edu",
   "vayuntandon@u.nus.edu",
 ];
 const FAKE_LOCALS = [
@@ -22,9 +22,9 @@ const FAKE_LOCALS = [
   "mei.ling", "noah.p", "olivia.s", "priya.nair", "qi.xuan", "ryan.teo",
 ];
 const DAYS = 21;
-// Solar Squad doubles as the shared residential floor: it is the group the pitch demos,
-// so it is topped up until the 5x5 garden grid actually reads as full.
-const DEMO_GROUP_SIZE = 20;
+// SOC is school-wide — everyone is in it, so it needs no size constant. It is the group the
+// pitch demos and the one that fills the 5x5 plot. (DEMO_GROUP_SIZE is gone: the roster in
+// the memberships block is now explicit rather than a round-robin topped up to a target.)
 // Demo group is seeded just short of its goal so the live contribute-to-unlock beat is
 // a small, affordable top-up rather than a 750-point cliff.
 const DEMO_GROUP_FILL = 0.95;
@@ -111,19 +111,47 @@ for (const u of users) {
 }
 
 // ---- memberships ------------------------------------------------------------
-const memberships = users.map((u, i) => ({ user_id: u.id, group_id: groups[i % groups.length].id }));
-const demo = users.find((u) => u.email === DEMO_EMAIL)!;
-memberships.push({ user_id: demo.id, group_id: groups[1 % groups.length].id }); // demo user in 2 groups
-const demoGroupId = groups[0].id;
-// Top the demo group up to DEMO_GROUP_SIZE. Everyone keeps their round-robin home
-// group and picks up the shared floor as a second one, which is also the multi-group
-// case the product claims to support but only the demo user previously exercised.
-for (const u of users) {
-  if (memberships.filter((m) => m.group_id === demoGroupId).length >= DEMO_GROUP_SIZE) break;
-  if (!memberships.some((m) => m.user_id === u.id && m.group_id === demoGroupId)) {
-    memberships.push({ user_id: u.id, group_id: demoGroupId });
-  }
+// Resolved by NAME, never by array position: group_id is a serial and the pitch depends on
+// SOC being the lowest id (/garden redirects there), so a positional lookup would fail
+// silently and quietly point the demo at the wrong garden.
+const groupByName = new Map(groups.map((g) => [g.name as string, g.id as number]));
+for (const n of ["SOC", "Raffles Hall", "NUSC"]) {
+  if (!groupByName.has(n)) throw new Error(`Group "${n}" is missing — apply supabase/schema.sql first.`);
 }
+const SOC = groupByName.get("SOC")!;
+const RAFFLES = groupByName.get("Raffles Hall")!;
+const NUSC = groupByName.get("NUSC")!;
+
+const idOf = (email: string) => {
+  const u = users.find((x) => x.email === email);
+  if (!u) throw new Error(`No seeded user for ${email}`);
+  return u.id;
+};
+const fake = (n: number, m: number) => FAKE_LOCALS.slice(n, m).map((l) => `${l}@u.nus.edu`);
+
+// SOC is school-wide: everyone is in it, and it is the group the pitch demos, so it is the
+// one that has to fill the 5x5 plot.
+const memberships = users.map((u) => ({ user_id: u.id, group_id: SOC }));
+
+// The residential hall and the college. Real members are explicit; the fakes are padding so
+// these plots read as inhabited rather than as two nearly-empty grids.
+const ROSTER: [number, string[]][] = [
+  [RAFFLES, [DEMO_EMAIL, "sairathomas@u.nus.edu", ...fake(0, 10)]],
+  [NUSC, ["ziern_teh@u.nus.edu", ...fake(10, 18)]],
+];
+for (const [groupId, emails] of ROSTER) {
+  for (const email of emails) memberships.push({ user_id: idOf(email), group_id: groupId });
+}
+
+const demo = users.find((u) => u.email === DEMO_EMAIL)!;
+const demoGroupId = SOC;
+
+// Wipe first: this table is a composite PK with no `id`, so it is not covered by the
+// generated-data wipe below. Without this, memberships from a previous seed survive and the
+// explicit roster above is polluted by whatever the old model assigned.
+const { error: memWipeErr } = await admin.from("group_memberships").delete().gt("group_id", 0);
+if (memWipeErr) throw new Error(`group_memberships wipe: ${memWipeErr.message}`);
+
 const { error: memErr } = await admin
   .from("group_memberships")
   .upsert(memberships, { onConflict: "user_id,group_id", ignoreDuplicates: true });
