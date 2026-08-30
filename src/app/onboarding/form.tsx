@@ -4,32 +4,21 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { toJpeg } from "@/lib/image";
 
-/**
- * Re-encode to a 256px JPEG. Fixes two things at once: iOS hands over HEIC that
- * most browsers can't render, and phone photos are multi-megabyte for a 48px circle.
- */
-async function toJpeg(file: File): Promise<Blob> {
-  const bmp = await createImageBitmap(file);
-  const side = Math.min(bmp.width, bmp.height);
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = 256;
-  canvas
-    .getContext("2d")!
-    .drawImage(bmp, (bmp.width - side) / 2, (bmp.height - side) / 2, side, side, 0, 0, 256, 256);
-  return new Promise((res) => canvas.toBlob((b) => res(b!), "image/jpeg", 0.85));
-}
 
 export default function ProfileForm({
   userId,
   initialUsername = "",
   initialAvatarUrl = null,
   submitLabel = "Save",
+  redirectTo = "/",
 }: {
   userId: string;
   initialUsername?: string;
   initialAvatarUrl?: string | null;
   submitLabel?: string;
+  redirectTo?: string;
 }) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
@@ -56,7 +45,7 @@ export default function ProfileForm({
       const path = `${userId}/avatar.jpg`;
       const { error } = await supabase.storage
         .from("avatars")
-        .upload(path, await toJpeg(file), { upsert: true, contentType: "image/jpeg" });
+        .upload(path, await toJpeg(file, 256, true), { upsert: true, contentType: "image/jpeg" });
       if (error) {
         setError(`Photo upload failed: ${error.message}`);
         setBusy(false);
@@ -82,7 +71,7 @@ export default function ProfileForm({
       setBusy(false);
       return;
     }
-    router.replace("/");
+    router.replace(redirectTo);
     router.refresh();
   }
 

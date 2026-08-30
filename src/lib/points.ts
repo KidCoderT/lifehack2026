@@ -26,3 +26,13 @@ export function addDays(day: string, n: number): string {
   d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
 }
+
+/**
+ * Signed percent under the frozen baseline — negative on an over-baseline day.
+ * `earnFor` floors at 0 and pays only the positive side; this is the display value,
+ * rounded the same way so "−12%" and "+120 pts" always reconcile on screen.
+ */
+export function savingsPct(baseline: number, actual: number): number {
+  if (!(baseline > 0)) return 0;
+  return Math.round((1 - actual / baseline) * 100);
+}

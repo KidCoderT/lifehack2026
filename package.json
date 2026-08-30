@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "bun scripts/seed.ts",
-    "db:push": "bunx supabase@2.116.0 db query --db-url \"$SUPABASE_DB_URL\" -f supabase/schema.sql"
+    "db:push": "bun scripts/db-push.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

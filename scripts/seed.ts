@@ -225,10 +225,21 @@ const demoGroup = groups[0];
 const peer = users[REAL_EMAILS.length]; // first fake user
 const { error: evErr } = await admin.from("events").insert([
   {
-    kind: "alert", group_id: demoGroup.id, message: "Lights left on in Common Room (Level 3)",
+    kind: "alert", group_id: demoGroup.id, status: "open", message: "Lights left on in Common Room (Level 3)",
   },
   {
-    kind: "nudge", group_id: demoGroup.id, from_user: peer.id, to_user: demo.id,
+    kind: "alert", group_id: demoGroup.id, status: "open", message: "Aircon running with the windows open in Study Pod B",
+  },
+  {
+    kind: "alert", group_id: demoGroup.id, status: "open", message: "Pantry kettle left on the boil overnight",
+  },
+  {
+    // Already handled, so the inbox has a resolved card to show the photo + credit layout.
+    kind: "alert", group_id: demoGroup.id, status: "fixed", resolved_by: peer.id,
+    message: "Corridor lights on at midday (Level 2)",
+  },
+  {
+    kind: "nudge", group_id: demoGroup.id, status: "open", from_user: peer.id, to_user: demo.id,
     message: `🌱 ${peer.username} sent you a leaf — no savings logged yesterday!`,
   },
 ]);
